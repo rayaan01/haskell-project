@@ -5,6 +5,9 @@
 -- GDP Data https://databank.worldbank.org/source/world-development-indicators
 
 ## Indicators
+=======
+-- country ID | Country name | Contient | Capital
+-- Country name | Population | GDP
 
 Population: SP.POP.TOTL
 GDP:        NY.GDP.MKTP.CD
