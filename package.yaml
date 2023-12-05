@@ -46,6 +46,8 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell-project
+    - time
+    - sqlite-simple
 
 tests:
   haskell-project-test:
