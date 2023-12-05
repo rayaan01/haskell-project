@@ -1,29 +1,23 @@
-DROP TABLE IF EXISTS checkedout;
-DROP TABLE IF EXISTS tools;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS POPULATION;
+DROP TABLE IF EXISTS GDP;
 
-CREATE TABLE users (
-       id INTEGER PRIMARY KEY,
-       username TEXT
+
+CREATE TABLE POPULATION (
+       countryID INTEGER PRIMARY KEY,
+       countryNameP TEXT,
+       continent TEXT,
+       capital TEXT
        );
 
-CREATE TABLE tools (
-       id INTEGER PRIMARY KEY,
-       name TEXT,
-       description TEXT,
-       lastReturned TEXT,                 
-       timesBorrowed INTEGER
+CREATE TABLE GDP (
+       countryNameG TEXT PRIMARY KEY,
+       totalPopulation INTEGER,
+       gdp FLOAT
        );
 
-CREATE TABLE checkedout (
-       user_id INTEGER,
-       tool_id INTEGER
-       );
 
-INSERT INTO users (username) VALUES ('willkurt');
+INSERT INTO POPULATION (countryID,countryNameP,continent,capital)
+VALUES (1,'India','Asia','Delhi');
 
-INSERT INTO tools (name,description,lastReturned,timesBorrowed)
-VALUES ('hammer','hits stuff','2017-01-01',0);
-
-INSERT INTO tools (name,description,lastReturned,timesBorrowed)
-VALUES ('saw','cuts stuff','2017-01-01',0);
+INSERT INTO GDP (countryNameG,totalPopulation,gdp)
+VALUES ('India','1000','500');
