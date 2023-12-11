@@ -1,3 +1,10 @@
+# Build 
+
+Make sure these deps are installed: `libbz2 libbz2-dev`
+On Ubuntu: `sudo apt install libbz2-dev`
+
+
+
 # Data Download Links
 
 ## Worldbank
