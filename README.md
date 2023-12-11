@@ -6,8 +6,8 @@
 
 ## Indicators
 =======
--- country ID | Country name | Contient | Capital
--- Country name | Population | GDP
+Population -- Country ID | Country name | 2005 | 2010 | 2015 | 2020 | Capital
+GDP -- Country name | 2005 | 2010 | 2015 | 2020 |
 
 Population: SP.POP.TOTL
 GDP:        NY.GDP.MKTP.CD

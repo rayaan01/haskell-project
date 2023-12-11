@@ -46,6 +46,10 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell-project
+    - cassava
+    - bytestring
+    - vector
+    - mtl
 
 tests:
   haskell-project-test:
