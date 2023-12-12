@@ -46,10 +46,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell-project
-    - cassava
-    - bytestring
-    - vector
-    - mtl
     - MissingH
     - parsec
 
