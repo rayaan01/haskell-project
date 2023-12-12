@@ -4,7 +4,6 @@ DROP TABLE IF EXISTS GDP;
 CREATE TABLE POPULATION (
     countryID INTEGER PRIMARY KEY,
     countryNameP TEXT,
-    continent TEXT,
     capital TEXT,
     pop2005 INTEGER,
     pop2010 INTEGER,
@@ -20,14 +19,17 @@ CREATE TABLE GDP (
     gdp2020 FLOAT
 );
 
-INSERT INTO POPULATION (countryID, countryNameP, continent, capital, pop2005, pop2010, pop2015, pop2020)
-VALUES (1, 'India', 'Asia', 'Delhi', 1000000, 1100000, 1200000, 1300000);
+INSERT INTO POPULATION (countryID, countryNameP, capital, pop2005, pop2010, pop2015, pop2020)
+VALUES (1, 'India', 'Delhi', 1000000, 1100000, 1200000, 1300000);
 
 INSERT INTO GDP (countryNameG, gdp2005, gdp2010, gdp2015, gdp2020)
 VALUES ('India', 500.0, 600.0, 700.0, 800.0);
 
-INSERT INTO POPULATION (countryID, countryNameP, continent, capital, pop2005, pop2010, pop2015, pop2020)
-VALUES (2, 'China', 'Asia', 'BC', 10001200, 110120000, 1200000, 1300000);
+INSERT INTO POPULATION (countryID, countryNameP, capital, pop2005, pop2010, pop2015, pop2020)
+VALUES (2, 'China', 'BC', 10001200, 110120000, 1200000, 1300000);
 
 INSERT INTO GDP (countryNameG, gdp2005, gdp2010, gdp2015, gdp2020)
 VALUES ('China', 5050.0, 6050.0, 7050.0, 8050.0);
+
+
+Drop existing tables if they exist
