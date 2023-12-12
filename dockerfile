@@ -10,10 +10,12 @@ RUN ghcup install stack
 # RUN "export PATH=$PATH:.ghcup/bin/"
 ENV PATH="${PATH}:/.ghcup/bin"
 
+# Dep for ghc
 RUN apt install -y build-essential libgmp-dev
 
 COPY . /haskell-project/
 WORKDIR /haskell-project
+#Dep for zip library
 RUN apt install -y pkg-config zlib1g-dev libbz2-dev
 RUN stack build
 
