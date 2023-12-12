@@ -1,11 +1,7 @@
 module Main (main) where
 
-import Data.CSV
-import Text.ParserCombinators.Parsec
-
-removeComma = filter (/= ',')
+import Parse
 
 main :: IO ()
 main = do
-    result <- parseFromFile csvFile "gdp.csv"
-    putStrLn $ show result
+    parseCSV "gdp.csv"

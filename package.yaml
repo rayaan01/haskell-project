@@ -35,6 +35,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+    - MissingH
+    - parsec
 
 executables:
   haskell-project-exe:
@@ -46,8 +49,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell-project
-    - MissingH
-    - parsec
 
 tests:
   haskell-project-test:
