@@ -40,6 +40,8 @@ library:
   - parsec
   - http-conduit >= 2.3
   - bytestring
+  - time
+  - sqlite-simple
 
 executables:
   haskell-project-exe:

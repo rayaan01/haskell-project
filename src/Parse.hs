@@ -4,6 +4,7 @@ module Parse (parseCSV) where
 import Data.CSV
 import Text.ParserCombinators.Parsec
 import Data.Either
+import System.IO
 -- import Data.Typeable
 
 data RecordGDP = GDP {
@@ -20,24 +21,37 @@ data RecordCsv = Record {
   r_id :: Int,
   r_country :: String,
   year:: String,
-  gdp :: Int
+  gdp :: String
 } deriving (Show)
 
 parseRecord :: [String] -> RecordCsv
-parseRecord record = Record { r_id = read (head record) , r_country = record !! 1, year = record !! 2, gdp = read $ filter (/=',') (record !! 4 )}
+parseRecord record = Record { r_id = read (head record) , r_country = record !! 1, year = record !! 2, gdp = (record !! 4 )}
 
+filterGDP :: [String] -> Bool
+filterGDP (_:_:_:x:xs)= x == "GDP in current prices (millions of US dollars)"
+
+filterYear :: [String] -> Bool
+filterYear (_:_:x:xs)= x == "2010" || x == "2015" || x == "2021"
 
 parseGDP :: [[String]] ->  IO ()
 parseGDP csvData  = do
   -- print $ typeOf $ (take 1 csvData) !! 0
   -- print $ parseRecord $ (take 1 csvData) !! 0
-  let csvRecord =  map parseRecord csvData
-  print $ head csvRecord
+  let filteredRecord = filter filterGDP csvData
+  let newFilteredRecord = filter filterYear filteredRecord
+  let csvRecord =  map parseRecord newFilteredRecord
+  print $ take 10 csvRecord
 
 parseCSV :: String -> IO ()
 parseCSV fileCSV = do
-    result <- parseFromFile csvFile fileCSV
+    handle <- openFile fileCSV ReadMode
+    hSetEncoding handle char8
+    contents <- hGetContents handle
+    let result =  parse csvFile "" contents
     let csvData = fromRight [["invalid"]] result
-    parseGDP $ drop 2 csvData
+    -- print $ take 10 csvData
+    parseGDP $ drop 842 csvData
+    hClose handle
+    -- result <- parseFromFile csvFile fileCSV
 
 
