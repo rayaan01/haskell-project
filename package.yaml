@@ -36,6 +36,8 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
+  - MissingH
+  - parsec
   - http-conduit >= 2.3
   - bytestring
 

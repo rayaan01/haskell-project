@@ -15,7 +15,10 @@ Pop : https://data.un.org/_Docs/SYB/CSV/SYB66_1_202310_Population,%20Surface%20A
 GDP : https://data.un.org/_Docs/SYB/CSV/SYB66_230_202310_GDP%20and%20GDP%20Per%20Capita.csv
 
 
-## The above links were coppied from:
+## Indicators
+=======
+Population -- Country ID | Country name | 2005 | 2010 | 2015 | 2020 | Capital
+GDP -- Country name | 2005 | 2010 | 2015 | 2020 |
 
 ### WorldBank
 Pop: https://data.worldbank.org/indicator/SP.POP.TOTL
