@@ -2,6 +2,7 @@ module Main (main) where
 
 import Fetch (downloadURLS, URLS(..))
 import Parse
+import Database
 
 -- | The Main function
 main :: IO ()
@@ -16,3 +17,10 @@ main = do
   -- Parsing
 
   parseCSV "gdp.csv"
+
+  -- Database
+
+  createTables
+    mapM_ addPopulation popData
+    mapM_ addGDP gdpData
+    putStrLn "Data Added Succesfully!"
