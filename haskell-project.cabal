@@ -6,9 +6,9 @@ cabal-version: 2.2
 
 name:           haskell-project
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/haskell-project#readme>
-homepage:       https://github.com/githubuser/haskell-project#readme
-bug-reports:    https://github.com/githubuser/haskell-project/issues
+description:    Please see the README on GitHub at <https://github.com/cray-mx/haskell-project#readme>
+homepage:       https://github.com/cray-mx/haskell-project#readme
+bug-reports:    https://github.com/cray-mx/haskell-project/issues
 author:         Author name here
 maintainer:     example@example.com
 copyright:      2023 Author name here
@@ -21,12 +21,13 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/haskell-project
+  location: https://github.com/cray-mx/haskell-project
 
 library
   exposed-modules:
       Database
       Lib
+      Parse
   other-modules:
       Paths_haskell_project
   autogen-modules:
@@ -35,7 +36,11 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      MissingH
+    , base >=4.7 && <5
+    , bytestring
+    , http-conduit >=2.3
+    , parsec
     , sqlite-simple
     , time
   default-language: Haskell2010
