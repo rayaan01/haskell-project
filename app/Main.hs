@@ -3,6 +3,7 @@ module Main (main) where
 import Fetch (downloadURLS, URLS(..))
 import Parse
 
+-- | The Main function
 main :: IO ()
 main = do
   -- Fetching
