@@ -49,6 +49,9 @@ https://data.un.org/_Docs/SYB/CSV/SYB66_230_202310_GDP%20and%20GDP%20Per%20Capit
 Example for austrilia (aus)
 https://api.worldbank.org/v2/country/aus/indicator/SP.POP.TOTL?date=2000
 
+
+GDP- 2010, 2015, 2021
+Population - 2010, 2015, 2021
 # MISC
 ## API Indicators
 
