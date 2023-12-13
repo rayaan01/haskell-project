@@ -53,5 +53,3 @@ parseCSV fileCSV = do
     parseGDP $ drop 842 csvData
     hClose handle
     -- result <- parseFromFile csvFile fileCSV
-
-
