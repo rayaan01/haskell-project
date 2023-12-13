@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Database
       Lib
   other-modules:
       Paths_haskell_project
@@ -35,6 +36,8 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , sqlite-simple
+    , time
   default-language: Haskell2010
 
 executable haskell-project-exe
@@ -49,8 +52,6 @@ executable haskell-project-exe
   build-depends:
       base >=4.7 && <5
     , haskell-project
-    , sqlite-simple
-    , time
   default-language: Haskell2010
 
 test-suite haskell-project-test

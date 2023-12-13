@@ -5,10 +5,8 @@ module Main where
 import Control.Applicative
 import Database.SQLite.Simple                   
 import Database.SQLite.Simple.FromRow           
-import Data.Time                                
-
--- main :: IO ()
--- main = print "db-lesson"
+import Data.Time    
+import Data.Char (isDigit)                            
 
 data Population = Population
  { countryID :: Int
@@ -50,40 +48,45 @@ instance Show GDP where
                       , show $ gdp2021 gdp
                       , "\n"]
 
-
--- addPopulation :: Int -> String -> String -> Int -> Int -> Int -> IO ()
--- addPopulation countryID countryNameP capital pop2010 pop2015 pop2021 = withConn "tools.db" $ \conn -> do
---    execute conn "INSERT INTO POPULATION (countryID, countryName, capital, 2010, 2015, 2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
---    putStrLn "Population data added"
-
--- addGDP :: String -> Int -> Int -> Int -> IO ()
--- addGDP countryNameG gdp2010 gdp2015 gdp2021 = withConn "tools.db" $ \conn -> do
---    execute conn "INSERT INTO GDP (countryName, 2010, 2015, 2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)                                            
---    putStrLn "GDP data added"
-
 withConn :: String -> (Connection -> IO ()) -> IO ()
 withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
 
+-- Assuming popData and gdpData are lists of tuples...
+popData :: [(Int, String, String, Int, Int, Int)]
+popData = [(3, "USA", "Delhi", 100, 200, 300), (4, "Russia", "Karachi", 100, 200, 300)]
 
 addPopulation :: (Int, String, String, Int, Int, Int) -> IO ()
 addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = withConn "tools.db" $ \conn -> do
    execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
   --  putStrLn "Population data added"
 
-addGDP :: (String, Int, Int, Int) -> IO ()
-addGDP (countryNameG, gdp2010, gdp2015, gdp2021) = withConn "tools.db" $ \conn -> do
-   execute conn "INSERT INTO GDP (countryNameG, gdp2010, gdp2015, gdp2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)                                            
-  --  putStrLn "GDP data of added"
+-- Define a type for the record
+data Record = Record { r_id :: Int, r_country :: String, year :: String, gdp :: String }
 
--- Assuming popData and gdpData are lists of tuples...
-popData :: [(Int, String, String, Int, Int, Int)]
-popData = [(3, "USA", "Delhi", 100, 200, 300), (4, "Russia", "Karachi", 100, 200, 300)]
+-- Define your data
+gdpData :: [Record]
+gdpData = [Record {r_id = 1, r_country = "Afghanistan", year = "2010", gdp = "14,699"},
+           Record {r_id = 1, r_country = "Afghanistan", year = "2015", gdp = "18,713"},
+           Record {r_id = 1, r_country = "Afghanistan", year = "2021", gdp = "14,939"},
+           Record {r_id = 2, r_country = "Albania", year = "2010", gdp = "11,927"},
+           Record {r_id = 2, r_country = "Albania", year = "2015", gdp = "11,387"},
+           Record {r_id = 2, r_country = "Albania", year = "2021", gdp = "18,260"},
+           Record {r_id = 3, r_country = "Algeria", year = "2010", gdp = "161,207"},
+           Record {r_id = 3, r_country = "Algeria", year = "2015", gdp = "165,979"},
+           Record {r_id = 3, r_country = "Algeria", year = "2021", gdp = "163,473"}]
 
-gdpData :: [(String, Int, Int, Int)]
-gdpData = [("USA", 10, 30, 25), ("Russia", 11, 31, 30)]
+-- Modify the addGDP function
+addGDP :: Record -> IO ()
+addGDP record = withConn "tools.db" $ \conn -> do
+    let countryNameG = r_country record
+    let gdp2010 = read (filter isDigit (gdp (head (filter (\r -> year r == "2010") gdpData)))) :: Int
+    let gdp2015 = read (filter isDigit (gdp (head (filter (\r -> year r == "2015") gdpData)))) :: Int
+    let gdp2021 = read (filter isDigit (gdp (head (filter (\r -> year r == "2021") gdpData)))) :: Int
+    execute conn "INSERT OR REPLACE INTO GDP (countryNameG, gdp2010, gdp2015, gdp2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)
+
 
 -- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 createTables :: IO ()
