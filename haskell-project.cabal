@@ -28,6 +28,7 @@ library
       Database
       Fetch
       Parse
+      Types
   other-modules:
       Paths_haskell_project
   autogen-modules:
@@ -40,6 +41,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , http-conduit >=2.3
+    , http-types
     , parsec
     , sqlite-simple
     , time

@@ -1,27 +1,27 @@
-module Fetch (downloadURLS, URLS(..)) where
+module Fetch (downloadURLS ) where
 
 import Network.HTTP.Simple
+import Network.HTTP.Types.Status
 import qualified Data.ByteString.Char8 as B8
+import Types (URLS(..))
 
-data URLS = -- | URLS is used to save urls from which to download the data. 
-  URLS {
-  gdp_url :: String, -- ^ url from which to download GDP 
-  pop_url :: String, -- ^ url from which to download pop
-  isZip :: Bool  -- ^ bool to know if the link gives  a zip or not
-} deriving (Show)
+writeToFile contents filename = B8.writeFile filename contents  
 
 -- | dowloads both gdp and pop data from the urls given.
 downloadURLS :: URLS -> IO ()
 downloadURLS datasite = do
-  let ext = if (isZip datasite ) then ".zip" else ".csv"
-  downloadFile (gdp_url datasite) ("gdp" ++ ext)
-  downloadFile (pop_url datasite) ("pop" ++ ext)
+  let ext = if isZip datasite then ".zip" else ".csv"
+  
+  contents <- downloadContent (gdp_url datasite) 
+  B8.writeFile ("gdp" ++ ext) contents
+
+  popContent <- downloadContent (pop_url datasite)
+  B8.writeFile ("pop" ++ ext) popContent
 
 -- | downloads a file of an internet and saves the output to the given file.    
-downloadFile :: String -> String -> IO ()
-downloadFile url filename = do
+downloadContent :: String -> IO B8.ByteString 
+downloadContent url = do
   let req = parseRequest_ url
   responce <- httpBS req
-  -- putStrLn $ show $ getResponseStatusCode responce
-  B8.writeFile filename  $ getResponseBody responce
+  pure $ getResponseBody responce
 

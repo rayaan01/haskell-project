@@ -42,6 +42,7 @@ library:
   - bytestring
   - time
   - sqlite-simple
+  - http-types
 
 executables:
   haskell-project-exe:
