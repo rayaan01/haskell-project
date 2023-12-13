@@ -12,10 +12,10 @@ downloadURLS :: URLS -> IO ()
 downloadURLS datasite = do
   let ext = if isZip datasite then ".zip" else ".csv"
   
-  contents <- downloadContent (gdp datasite) 
+  contents <- downloadContent (gdp_url datasite) 
   B8.writeFile ("gdp" ++ ext) contents
 
-  popContent <- downloadContent (pop datasite)
+  popContent <- downloadContent (pop_url datasite)
   B8.writeFile ("pop" ++ ext) popContent
 
 -- | downloads a file of an internet and saves the output to the given file.    
