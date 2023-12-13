@@ -42,6 +42,7 @@ library:
   - bytestring
   - time
   - sqlite-simple
+  - http-types
 
 executables:
   haskell-project-exe:
@@ -53,8 +54,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell-project
-    - time
-    - sqlite-simple
 
 tests:
   haskell-project-test:
