@@ -11,7 +11,8 @@ main = do
   
   let dataWorldBank = URLS {gdp = "https://api.worldbank.org/v2/en/indicator/NY.GDP.MKTP.CD?downloadformat=csv", pop = "https://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv", isZip = True}
 
-  downloadURLS dataWorldBank 
-  
+  downloadURLS dataUN
+
   -- Parsing
+
   parseCSV "gdp.csv"
