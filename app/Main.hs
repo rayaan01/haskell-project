@@ -2,6 +2,7 @@ module Main (main) where
 
 import Fetch (downloadURLS, URLS(..))
 
+-- | The Main function
 main :: IO ()
 main = do
 

@@ -21,8 +21,6 @@ description:         Please see the README on GitHub at <https://github.com/cray
 
 dependencies:
 - base >= 4.7 && < 5
-- http-conduit >= 2.3
-- bytestring
 
 ghc-options:
 - -Wall
@@ -37,6 +35,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - http-conduit >= 2.3
+  - bytestring
 
 executables:
   haskell-project-exe:
