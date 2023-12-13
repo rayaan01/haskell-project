@@ -1,15 +1,14 @@
-
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Control.Applicative
-import Database.SQLite.Simple                   
-import Database.SQLite.Simple.FromRow           
-import Data.Time                                
+import Fetch (downloadURLS, URLS(..))
+import Parse
 
+-- | The Main function
 -- main :: IO ()
 -- main = print "db-lesson"
 
+-- | Represent population data with country Id(Primary Key), country name(foreign key) and population data for years 2010, 2015, 2021.
 data Population = Population
  { countryID :: Int
  , countryNameP :: String
@@ -19,6 +18,7 @@ data Population = Population
  , capital :: String
  }
 
+-- | Represent GDP data with country name(foreign key) and GDP data for years 2010, 2015, 2021.
 data GDP = GDP
  { countryNameG :: String
  , gdp2010 :: Int
@@ -26,6 +26,7 @@ data GDP = GDP
  , gdp2021 :: Int
  }
 
+-- | To show headers to the population datatable  
 instance Show Population where
    show population = mconcat [ show $ countryID population
                              , ".) "
@@ -40,6 +41,7 @@ instance Show Population where
                              , show $ pop2021 population
                              , "\n"]
 
+-- | To show headers to GDP datatable. 
 instance Show GDP where
    show gdp = mconcat [ countryNameG gdp
                       , ", 2010: "
@@ -61,6 +63,7 @@ instance Show GDP where
 --    execute conn "INSERT INTO GDP (countryName, 2010, 2015, 2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)                                            
 --    putStrLn "GDP data added"
 
+-- | Helper function to manage database connections.
 withConn :: String -> (Connection -> IO ()) -> IO ()
 withConn dbName action = do
    conn <- open dbName
