@@ -70,35 +70,25 @@ createTables = withConn "tools.db" $ \conn -> do
     putStrLn "Tables created"
 
 
+-- Function to fetch GDP data
 fetchGDP :: String -> String -> IO ()
 fetchGDP countryName year = withConn "tools.db" $ \conn -> do
-    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only countryName) :: IO [(Float, Float, Float)]
+    let capitalizedCountryName = capitalizeWords countryName
+    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only capitalizedCountryName) :: IO [(Float, Float, Float)]
     case r of
         [] -> putStrLn "No data found"
-        [(gdp2010, gdp2015, gdp2021)] -> case year of
-            "2010" -> putStrLn ("GDP Data of "++ countryName ++ " :" ++ show gdp2010)
-            "2015" -> putStrLn ("GDP Data of "++ countryName ++ " :" ++ show gdp2015)
-            "2021" -> putStrLn ("GDP Data of "++ countryName ++ " :" ++ show gdp2021)
-            _ -> putStrLn "Invalid year"
+        [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year capitalizedCountryName gdp2010 gdp2015 gdp2021
+        _ -> putStrLn "Invalid year"
 
+-- Function to fetch population data
 fetchPopulation :: String -> String -> IO ()
 fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
-    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(String, String, String)]
+    let capitalizedCountryName = capitalizeWords countryName
+    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only capitalizedCountryName) :: IO [(String, String, String)]
     case r of
         [] -> putStrLn "No data found"
-        [(pop2010, pop2015, pop2021)] -> case year of
-            "2010" -> putStrLn ("Polution Data of "++ countryName ++ " : " ++ pop2010 ++ " Million")
-            "2015" -> putStrLn ("Polution Data of "++ countryName ++ " : " ++ pop2015 ++ " Million")
-            "2021" -> putStrLn ("Polution Data of "++ countryName ++ " : " ++ pop2021 ++ " Million")
-            _ -> putStrLn "Invalid year"
-
---------------------------------------
-
--- selectYear y 
---    | y == "2010" = 2010
---    | y == "2015" = 2015
---    | y == "2021" = 2021
---    | otherwise = 0
+        [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year capitalizedCountryName pop2010 pop2015 pop2021
+        _ -> putStrLn "Invalid year"
 
 -- Function to prompt user and fetch data
 fetchData :: IO ()
@@ -145,7 +135,7 @@ formatPopulationData year countryName pop2010 pop2015 pop2021 =
             "2015" -> pop2015
             "2021" -> pop2021
             _ -> "Invalid year"
-    in "\nPopulation Data of " ++ countryName ++ " for " ++ year ++ ": " ++ population ++ " Millions\n"
+    in "\n\nPopulation Data of " ++ countryName ++ " for " ++ year ++ ": " ++ population ++ " Millions"
 
 -- Function to format GDP data for display
 formatGDPData :: String -> String -> Float -> Float -> Float -> String
@@ -155,4 +145,4 @@ formatGDPData year countryName gdp2010 gdp2015 gdp2021 =
             "2015" -> gdp2015
             "2021" -> gdp2021
             _ -> error "Invalid year"
-    in "\nGDP Data of " ++ countryName ++ " for " ++ year ++ ": " ++ show gdp ++ "\n"
+    in "\nGDP Data of " ++ countryName ++ " for " ++ year ++ ": $ " ++ show gdp ++ "\n"
