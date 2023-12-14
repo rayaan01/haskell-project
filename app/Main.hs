@@ -3,6 +3,7 @@ import Fetch (downloadURLS, getURLConstructor)
 import Database
 import Parse (getGDP, getPOP)
 
+-- | main menu given to user for various operations 
 nameToBeDetermined = do
   putStrLn("\n\n1 - Fetch population of a country")
   putStrLn("2 - Fetch GDP of a country")
@@ -57,6 +58,7 @@ main = do
   putStrLn "Data Added Succesfully!"
   nameToBeDetermined
 
+  -- | Handle user input
   putStrLn("\n\n1 - Fetch population of a country")
   putStrLn("2 - Fetch GDP of a country")
   putStrLn("3 - Fetch both Population and GDP of a country")
