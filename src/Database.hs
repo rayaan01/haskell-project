@@ -13,11 +13,7 @@ withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
-
-addPopulation :: (Int, String, String, String, String, String) -> IO ()
-addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = withConn "tools.db" $ \conn -> do
-   execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
-
+   
 saveGDPData :: [RecordGDP] -> IO ()
 saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
@@ -61,7 +57,7 @@ createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
     execute_ conn "DROP TABLE IF EXISTS GDP;"
-    execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, capital TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
+    execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT, FOREIGN KEY (countryNameG) REFERENCES POPULATION(countryNameP));"
     putStrLn "Tables created"
 
