@@ -19,7 +19,6 @@ getURLConstructor source =
     isZip = True
   }
 
--- | Downloads both GDP and Population data from the URLs given.
 -- | Data from UN comes in a CSV format. Whereas from the World Bank, it is a zipped csv.
 downloadURLS :: URLS -> IO ()
 downloadURLS datasite = do
