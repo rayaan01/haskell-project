@@ -1,3 +1,4 @@
+-- | Functions for intracting with the database for storing.
 {-# LANGUAGE OverloadedStrings #-}
 module Database where
 
@@ -7,29 +8,33 @@ import Data.Time
 import Types
 import Data.Char (isDigit)                            
 
+-- | Opens a connection to the database and perform actions.
 withConn :: String -> (Connection -> IO ()) -> IO ()
 withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
 
+-- | Adds a population record to the database.
 addPopulation :: (Int, String, String, String, String, String) -> IO ()
 addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = withConn "tools.db" $ \conn -> do
    execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
 
+-- | Saves the record to the database.
 saveGDPData :: [RecordGDP] -> IO ()
 saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
 savePOPData :: [RecordPOP] -> IO ()
 savePOPData popData = mapM_ (addPOP popData) popData
 
--- The addGDP function
+-- | Fetches the GDP for a given year from user input
 getGdp :: String -> [RecordGDP] -> Int
 getGdp yr records = 
     case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
         (x:_) -> read (filter isDigit (gdp x)) :: Int
 
+-- | Adds the GDP record to the database.
 addGDP :: [RecordGDP] -> RecordGDP -> IO ()
 addGDP gdpData record = withConn "tools.db" $ \conn -> do
     let countryNameG = g_country record
@@ -39,6 +44,7 @@ addGDP gdpData record = withConn "tools.db" $ \conn -> do
     let gdp2021 = getGdp "2021" countryRecords
     execute conn "INSERT OR REPLACE INTO GDP (countryNameG, gdp2010, gdp2015, gdp2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)
 
+-- | Adds population record to the database.
 addPOP :: [RecordPOP] -> RecordPOP -> IO ()
 addPOP popData record = withConn "tools.db" $ \conn -> do
     let countryNameP = p_country record
@@ -48,13 +54,13 @@ addPOP popData record = withConn "tools.db" $ \conn -> do
     let pop2021 = getPop "2021" countryRecords
     execute conn "INSERT OR REPLACE INTO POPULATION (countryNameP, pop2010, pop2015, pop2021) VALUES (?,?,?,?)" (countryNameP, pop2010, pop2015, pop2021)
 
+-- | Fetches the population for a given country
 getPop :: String -> [RecordPOP] -> String
 getPop yr records = 
     case filter (\r -> p_year r == yr) records of
         [] -> "0" 
         (x:_) -> ((pop x)) :: String
 
--- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
@@ -63,7 +69,6 @@ createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT);"
     putStrLn "Tables created"
 
--- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 
 fetchGDP :: String -> String -> IO ()
 fetchGDP countryName year = withConn "tools.db" $ \conn -> do

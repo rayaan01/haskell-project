@@ -1,3 +1,4 @@
+-- | Module for downloding population data and GDP data from UN.
 module Fetch (downloadURLS, getURLConstructor) where
 
 import Network.HTTP.Simple
@@ -33,6 +34,7 @@ downloadURLS datasite = do
 -- | Downloads a file from the URLs and saves the output.
 downloadContent :: String -> IO B8.ByteString 
 
+-- | Download content from given URL and returns its ByteString 
 downloadContent url = do
   let req = parseRequest_ url
   response <- httpBS req
