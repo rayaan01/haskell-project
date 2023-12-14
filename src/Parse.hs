@@ -38,13 +38,7 @@ parseCSV fileCSV = do
     let parseRes = parse csvFile "gdb.csv" contents
     let csvData = fromRight [["invalid"]] parseRes  
     let !records = parseGDP csvData
-    -- print res
-    -- Required, so we don't close the handle before dooing
-    -- let records = parseGDP csvData
-    -- putStrLn "Forcing Evlauation of Result. "
-    -- print $ take 1 csvData
-    -- Dropping all non-Countries from the GDP List
-    -- putStrLn $ show records
+
     hClose handle
     -- let result = map pack result
     return records
