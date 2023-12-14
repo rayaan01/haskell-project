@@ -13,21 +13,19 @@ main = do
   
   let dataWorldBank = URLS {gdp_url = "https://api.worldbank.org/v2/en/indicator/NY.GDP.MKTP.CD?downloadformat=csv", pop_url = "https://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv", isZip = True}
 
-  -- _ = if not $ checkURLS dataUN then return () else True
-
   let files = CSVFiles { gdpf = "gdp", popf =  "pop"}
 
   downloadURLS dataUN
 
   -- Parsing
 
-  parseCSV files
-
+  records <- parseCSV files
   -- Database
 
   -- Create Tables from Schema
   createTables
 
   mapM_ addPopulation popData
-  mapM_ addGDP gdpData
+  
+  addGDP records -- "India"
   putStrLn "Data Added Succesfully!"
