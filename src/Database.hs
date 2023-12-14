@@ -1,3 +1,4 @@
+
 {-# LANGUAGE OverloadedStrings #-}
 module Database where
 
@@ -42,11 +43,12 @@ addGDP gdpData record = withConn "tools.db" $ \conn -> do
 addPOP :: [RecordPOP] -> RecordPOP -> IO ()
 addPOP popData record = withConn "tools.db" $ \conn -> do
     let countryNameP = p_country record
+    let countryID = p_id record
     let countryRecords = filter (\r -> p_country r == countryNameP) popData
     let pop2010 = getPop "2010" countryRecords
     let pop2015 = getPop "2015" countryRecords
     let pop2021 = getPop "2021" countryRecords
-    execute conn "INSERT OR REPLACE INTO POPULATION (countryNameP, pop2010, pop2015, pop2021) VALUES (?,?,?,?)" (countryNameP, pop2010, pop2015, pop2021)
+    execute conn "INSERT OR REPLACE INTO POPULATION (countryID, countryNameP, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?)" (countryID, countryNameP, pop2010, pop2015, pop2021)
 
 getPop :: String -> [RecordPOP] -> String
 getPop yr records = 
@@ -59,8 +61,8 @@ createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
     execute_ conn "DROP TABLE IF EXISTS GDP;"
-    execute_ conn "CREATE TABLE POPULATION (countryNameP TEXT PRIMARY KEY, capital TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
-    execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT);"
+    execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, capital TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
+    execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT, FOREIGN KEY (countryNameG) REFERENCES POPULATION(countryNameP));"
     putStrLn "Tables created"
 
 -- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
