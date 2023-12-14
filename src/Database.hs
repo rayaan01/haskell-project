@@ -166,7 +166,7 @@ displayAllGDPData = withConn dbPath  $ \conn -> do
 
 -- | Updates the population data for a specific country and year.
 updatePopulationData :: String -> String -> String -> IO ()
-updatePopulationData countryName year newPopulation = withConn "tools.db" $ \conn -> do
+updatePopulationData countryName year newPopulation = withConn dbPath $ \conn -> do
     let updateQuery = fromString $ "UPDATE POPULATION SET " ++ getPopulationColumn year ++ " = ? WHERE countryNameP = ?"
     execute conn updateQuery (newPopulation, countryName)
     putStrLn "Population data updated successfully."
@@ -180,7 +180,7 @@ getPopulationColumn _      = error "Invalid year"
 
 -- | Updates the GDP data for the user given country and year in the database
 updateGDPData :: String -> String -> String -> IO ()
-updateGDPData countryName year newGDP = withConn "tools.db" $ \conn -> do
+updateGDPData countryName year newGDP = withConn dbPath $ \conn -> do
     let capitalizedCountryName = capitalizeWords countryName
     let updateQuery = fromString $ "UPDATE GDP SET " ++ getGDPColumn year ++ " = ? WHERE countryNameG = ?"
     execute conn updateQuery (newGDP, capitalizedCountryName)
