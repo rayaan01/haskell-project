@@ -12,13 +12,19 @@ import Data.Either
 
 
 parseRecord :: [String] -> RecordCsv
-parseRecord record = Record { r_id = read $ record !! 0 , r_country = record !! 1, year = record !! 2, gdp = record !! 4}
+
+parseRecord record = Record {
+  r_id = read (head record),
+  r_country = record !! 1,
+  year = record !! 2,
+  gdp = record !! 4
+}
 
 filterGDP :: [String] -> Bool
-filterGDP (_:_:_:x:xs)= x == "GDP in current prices (millions of US dollars)"
+filterGDP x = x !! 3 == "GDP in current prices (millions of US dollars)"
 
 filterYear :: [String] -> Bool
-filterYear (_:_:x:xs)= x == "2010" || x == "2015" || x == "2021"
+filterYear x = x !! 2 == "2010" || x !! 2 == "2015" || x !! 2 == "2021"
 
 parseGDP :: [[String]] ->  [RecordCsv]
 parseGDP !csvData  = do
@@ -46,7 +52,3 @@ parseCSV fileCSV = do
     hClose handle
     -- let result = map pack result
     return records
-    -- readListPrecDefaultlt <- parseFromFile csvFile fileCSV
-    -- pure $ records
-
-

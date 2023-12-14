@@ -19,3 +19,4 @@ data RecordCsv = Record {
   year:: String,
   gdp :: String
 } deriving (Show)
+
