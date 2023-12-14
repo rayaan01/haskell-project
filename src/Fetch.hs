@@ -2,8 +2,8 @@ module Fetch (downloadURLS, getURLConstructor) where
 
 import Network.HTTP.Simple
 import qualified Data.ByteString.Char8 as B8
-import Types (URLS(..))
-
+import Types
+-- | Downloads both GDP and Population data from the URLs given.
 getURLConstructor :: String -> URLS
 getURLConstructor source =
   if source == "UN" 
@@ -30,8 +30,9 @@ downloadURLS datasite = do
   popContent <- downloadContent (pop_url datasite)
   B8.writeFile ("pop" ++ ext) popContent
 
--- | Downloads a file from the URLs and saves the output.    
-downloadContent :: String -> IO B8.ByteString
+-- | Downloads a file from the URLs and saves the output.
+downloadContent :: String -> IO B8.ByteString 
+
 downloadContent url = do
   let req = parseRequest_ url
   response <- httpBS req

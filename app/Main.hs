@@ -21,6 +21,8 @@ main = do
 
   -- Database
   createTables
-  -- callMain popData
-  callMain gdpData
+  -- callMain popData 
+  callMain gdpData 
   putStrLn "Data Added Succesfully!"
+  fetchGDP "United Kingdom" "2015"
+  fetchPopulation "USA" "2015"

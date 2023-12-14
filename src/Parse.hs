@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# LANGUAGE BangPatterns #-}
 module Parse (getGDP, getPOP) where
 
@@ -33,8 +32,8 @@ filterPOP x = x !! 3 == "Population mid-year estimates (millions)"
 filterYear :: [String] -> Bool
 filterYear x = x !! 2 == "2010" || x !! 2 == "2015" || x !! 2 == "2021"
 
-parseGDP :: [[String]] -> [RecordGDP]
-parseGDP !csvData = do
+parseGDP :: [[String]] ->  [RecordGDP]
+parseGDP csvData  = do
   let newcsvData = drop 842 csvData
   let filteredRecord = filter filterGDP newcsvData
   let newFilteredRecord = filter filterYear filteredRecord
@@ -55,7 +54,7 @@ getGDP = do
     contents <- hGetContents handle
     let parseRes = parse csvFile filePath contents
     let csvData = fromRight [["invalid"]] parseRes  
-    let records = parseGDP csvData
+    let !records = parseGDP csvData
     hClose handle
     return records
 

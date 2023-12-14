@@ -86,7 +86,6 @@ addGDP gdpData record = withConn "tools.db" $ \conn -> do
     let gdp2021 = getGdp "2021" countryRecords
     execute conn "INSERT OR REPLACE INTO GDP (countryNameG, gdp2010, gdp2015, gdp2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)
 
-
 -- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
@@ -95,3 +94,27 @@ createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, capital TEXT, pop2010 INTEGER, pop2015 INTEGER, pop2021 INTEGER);"
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT);"
     putStrLn "Tables created"
+
+-- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
+
+fetchGDP :: String -> String -> IO ()
+fetchGDP countryName year = withConn "tools.db" $ \conn -> do
+    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only countryName) :: IO [(Float, Float, Float)]
+    case r of
+        [] -> putStrLn "No data found"
+        [(gdp2010, gdp2015, gdp2021)] -> case year of
+            "2010" -> print (countryName, gdp2010)
+            "2015" -> print (countryName, gdp2015)
+            "2021" -> print (countryName, gdp2021)
+            _ -> putStrLn "Invalid year"
+
+fetchPopulation :: String -> String -> IO ()
+fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
+    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(Int, Int, Int)]
+    case r of
+        [] -> putStrLn "No data found"
+        [(pop2010, pop2015, pop2021)] -> case year of
+            "2010" -> print (countryName, pop2010)
+            "2015" -> print (countryName, pop2015)
+            "2021" -> print (countryName, pop2021)
+            _ -> putStrLn "Invalid year"
