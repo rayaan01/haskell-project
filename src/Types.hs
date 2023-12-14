@@ -1,18 +1,22 @@
+-- | This file has all data types used throughout the application.
 module Types (URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..)) where
 
-data URLS = -- | URLS is used to save urls from which to download the data. 
+-- | URLS is used to save urls from which to download the data.
+data URLS =  
   URLS {
   gdp_url :: String, -- ^ url from which to download GDP 
   pop_url :: String, -- ^ url from which to download pop
   isZip :: Bool  -- ^ bool to know if the link gives  a zip or not
 } deriving (Show)
 
-data CSVFiles = -- | Used to store file names of the files
+-- | Used to store file names of the files
+data CSVFiles = 
   CSVFiles {
     gdpf :: String,
     popf :: String
   }
 
+-- | recordGDP represents a single record of GDP data.
 data RecordGDP = RecordGDP {
   g_id :: Int,
   g_country :: String,
@@ -20,6 +24,7 @@ data RecordGDP = RecordGDP {
   gdp :: String
 } deriving (Show)
 
+-- | recordPOP represents a single record for POP data.
 data RecordPOP = RecordPOP {
   p_id :: Int,
   p_country :: String,
@@ -27,6 +32,7 @@ data RecordPOP = RecordPOP {
   pop :: String
 } deriving (Show)
 
+-- | The structure of population data.
 data Population = Population
  { countryID :: Int
  , countryNameP :: String
@@ -50,6 +56,7 @@ instance Show Population where
                              , show $ pop2021 population
                              , "\n"]
 
+-- | The structure of GDP data.
 data GDP = GDP
  { countryNameG :: String
  , gdp2010 :: Int
