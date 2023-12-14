@@ -4,6 +4,8 @@
 {-# LANGUAGE GADTs #-}
 module Database where
 
+import Database.SQLite.Simple (withConnection, query)
+-- import Database.SQLite.Simple.FromRow (Only(..))
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 import Types
@@ -94,46 +96,6 @@ fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
         [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year capitalizedCountryName pop2010 pop2015 pop2021
         _ -> putStrLn "Invalid year"
 
---------------------------------------
-
-createFtsTable :: IO ()
-createFtsTable= withConn "tools.db" $ \conn -> do
-    execute_ conn "DROP TABLE IF EXISTS NameFts;"
-    execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
-    execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"
-
-data CounOption where
-  CounOption :: String -> CounOption
-  deriving (Show)
-
-instance FromRow CounOption where
-  fromRow = CounOption <$> field
-
-executeFuzzyMatch :: Connection -> String -> IO [CounOption]
-executeFuzzyMatch conn userInput = do
-  let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
-  query conn que (Only userInput)
-
-convertToString :: [CounOption] -> [String]
-convertToString = map (\(CounOption str) -> str)
-
--- Function to prompt user and fetch data
-initiateFuzzySearch :: IO String
-initiateFuzzySearch = do
-    createFtsTable
-    countryName <- prompt "\nEnter the country name: "
-    conn <- open "tools.db"
-    results <- executeFuzzyMatch conn countryName
-    putStrLn "Confirm your choice: \n"
-    let gh = convertToString results
-    mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
-    close conn
-
-    option <- prompt "\n Your option: "
-    let op = read option :: Int
-
-    return (gh !! (op - 1))
-
 -- | Capitalizse each word in a given string for error handling
 capitalizeWords :: String -> String
 capitalizeWords = unwords . map capitalizeWord . words
@@ -142,12 +104,17 @@ capitalizeWord :: [Char] -> [Char]
 capitalizeWord "" = ""
 capitalizeWord (x:xs) = toUpper x : map toLower xs
 
--- To Ensure the prompt is displayed before reading input
-prompt :: String -> IO String
-prompt text = do
-    putStr text
-    hFlush stdout
-    getLine
+
+executeFuzzyMatch :: String -> String -> IO [CounOption]
+executeFuzzyMatch dbPath userInput = 
+  withConnection dbPath $ \conn -> do
+    let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
+    query conn que (Only userInput)
+
+-- executeFuzzyMatch :: Connection -> String -> IO [CounOption]
+-- executeFuzzyMatch conn userInput = do
+--   let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
+--   query conn que (Only userInput)
 
 -- Function to fetch population and GDP data
 fetchPopulationAndGDP :: String -> String -> IO ()
@@ -234,4 +201,8 @@ getGDPColumn _      = error "Invalid year"
 
 
 -- Similarly update the updateGDPData function
-
+createFtsTable :: IO ()
+createFtsTable= withConn "tools.db" $ \conn -> do
+    execute_ conn "DROP TABLE IF EXISTS NameFts;"
+    execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
+    execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"

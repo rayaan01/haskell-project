@@ -1,5 +1,7 @@
+{-# LANGUAGE GADTs #-}
 -- | This file has all data types used throughout the application.
-module Types (URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..)) where
+module Types (URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..), CounOption(..)) where
+import Database.SQLite.Simple.FromRow
 
 -- | URLS is used to save urls from which to download the data.
 data URLS =  
@@ -73,3 +75,10 @@ instance Show GDP where
                       , ", 2021: "
                       , show $ gdp2021 gdp
                       , "\n"]
+
+data CounOption where
+  CounOption :: String -> CounOption
+  deriving (Show)
+
+instance FromRow CounOption where
+  fromRow = CounOption <$> field
