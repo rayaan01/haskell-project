@@ -6,7 +6,6 @@ import Parse (getGDP, getPOP)
 import System.Exit (die)
 import System.IO
 
-
 -- | main menu given to user for various operations 
 nameToBeDetermined = do
   putStrLn "\n\n1 - Fetch population of a country"
@@ -79,7 +78,7 @@ initiateFuzzySearch :: IO String
 initiateFuzzySearch = do
     createFtsTable
     countryName <- prompt "\nEnter the country name: "
-    results <- executeFuzzyMatch "tools.db" countryName
+    results <- executeFuzzyMatch dbPath  countryName
     -- let te =  "Select From one of these: " ++ (length)
     putStrLn "Select from list: \n"
     let gh = convertToString results
