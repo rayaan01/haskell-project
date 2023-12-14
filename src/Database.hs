@@ -1,15 +1,14 @@
 -- | Functions for intracting with the database for storing.
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE GADTs #-}
 module Database where
 
-import Database.SQLite.Simple                   
-import Database.SQLite.Simple.FromRow           
-import Data.Time    
+import Database.SQLite.Simple
+import Database.SQLite.Simple.FromRow
 import Types
-import Data.Char (isDigit)   
-import Text.Read (readMaybe)  
+import Data.Char ( isDigit, toUpper, toLower )
 import System.IO (hFlush, stdout)
-import Data.Char (toUpper, toLower)
 import Data.List (intercalate)
 
 
@@ -19,7 +18,7 @@ withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
-   
+
 saveGDPData :: [RecordGDP] -> IO ()
 saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
@@ -28,7 +27,7 @@ savePOPData popData = mapM_ (addPOP popData) popData
 
 -- | Fetches the GDP for a given year from user input
 getGdp :: String -> [RecordGDP] -> Int
-getGdp yr records = 
+getGdp yr records =
     case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
         (x:_) -> read (filter isDigit (gdp x)) :: Int
@@ -56,9 +55,9 @@ addPOP popData record = withConn "tools.db" $ \conn -> do
 
 -- | Fetches the population for a given country
 getPop :: String -> [RecordPOP] -> String
-getPop yr records = 
+getPop yr records =
     case filter (\r -> p_year r == yr) records of
-        [] -> "0" 
+        [] -> "0"
         (x:_) -> ((pop x)) :: String
 
 createTables :: IO ()
@@ -94,32 +93,47 @@ fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
 
 --------------------------------------
 
--- selectYear y 
---    | y == "2010" = 2010
---    | y == "2015" = 2015
---    | y == "2021" = 2021
---    | otherwise = 0
+createFtsTable :: IO ()
+createFtsTable= withConn "tools.db" $ \conn -> do
+    execute_ conn "DROP TABLE IF EXISTS NameFts;"
+    execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
+    execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"
+
+data TestField where
+  TestField :: String -> TestField
+  deriving (Show)
+
+instance FromRow TestField where
+  fromRow = TestField <$> field 
+
+executeFuzzyMatch :: Connection -> String -> IO [TestField]
+executeFuzzyMatch conn userInput = do
+  let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
+  query conn que (Only userInput)
 
 -- Function to prompt user and fetch data
 fetchData :: IO ()
 fetchData = do
+    createFtsTable   
     countryName <- prompt "\nEnter the country name: "
-    let capitalizedCountryName = capitalizeWords countryName
-    year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-    fetchPopulationAndGDP capitalizedCountryName year
+    conn <- open "tools.db"
+    results <- executeFuzzyMatch conn countryName
+    -- let te =  "Select From one of these: " ++ (length)
+    mapM_ print results
+    close conn
+    -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+    -- fetchPopulationAndGDP capitalizedCountryName year
 
-capitalizeWords :: String -> String
-capitalizeWords = intercalate " " . map capitalizeWord . words
-
-capitalizeWord :: String -> String
-capitalizeWord "" = ""
-capitalizeWord (x:xs) = toUpper x : map toLower xs
+-- capitalizeWords :: String -> String
+-- capitalizeWords = intercalate " " . map capitalizeWord . words
+-- capitalizeWord "" = ""
+-- capitalizeWord (x:xs) = toUpper x : map toLower xs
 
 -- To Ensure the prompt is displayed before reading input
 prompt :: String -> IO String
 prompt text = do
     putStr text
-    hFlush stdout  
+    hFlush stdout
     getLine
 
 -- Function to fetch population and GDP data
