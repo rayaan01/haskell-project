@@ -19,3 +19,4 @@ data RecordGDP = RecordGDP {
   year:: String,
   gdp :: String
 } deriving (Show)
+
