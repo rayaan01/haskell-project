@@ -113,8 +113,8 @@ convertToString :: [CounOption] -> [String]
 convertToString = map (\(CounOption str) -> str)
 
 -- Function to prompt user and fetch data
-fetchData :: IO ()
-fetchData = do
+initiateFuzzySearch :: IO String
+initiateFuzzySearch = do
     createFtsTable
     countryName <- prompt "\nEnter the country name: "
     conn <- open "tools.db"
@@ -127,12 +127,8 @@ fetchData = do
 
     option <-  prompt "\n Your option: "
     let op = read option :: Int
-    -- let op =if option > (length gh) then Nothing else option
 
-    -- putStrLn $ "[INFO] >>>> " ++ show op
-    year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-    fetchPopulationAndGDP (gh !! (op -1) ) year
-
+    return (gh !! (op - 1 ))
     -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
     -- fetchPopulationAndGDP capitalizedCountryName year
 

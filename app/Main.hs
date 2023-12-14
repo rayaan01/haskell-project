@@ -16,17 +16,17 @@ nameToBeDetermined = do
   option <- prompt "\nSelect the option you want: "
   case option of
       "1" -> do
-        countryName <- prompt "\nEnter the country name: "
+        countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulation countryName year
         nameToBeDetermined
       "2" -> do
-        countryName <- prompt "\nEnter the country name: "
+        countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchGDP countryName year
         nameToBeDetermined
       "3" -> do
-        countryName <- prompt "\nEnter the country name: "
+        countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulationAndGDP countryName year
         nameToBeDetermined
@@ -40,7 +40,6 @@ nameToBeDetermined = do
       _ -> do
         putStrLn "Invalid option selected. Please try again."
         nameToBeDetermined
-
 
 -- | The Main function
 main :: IO ()
