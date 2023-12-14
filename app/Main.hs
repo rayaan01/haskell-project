@@ -15,17 +15,19 @@ main = do
 
   -- _ = if not $ checkURLS dataUN then return () else True
 
-  -- let files = CSVFiles { gdpf "gdp", popf "pop"}
+  let files = CSVFiles { gdpf = "gdp", popf =  "pop"}
 
   downloadURLS dataUN
 
   -- Parsing
 
-  parseCSV "gdp.csv"
+  parseCSV files
 
   -- Database
 
+  -- Create Tables from Schema
   createTables
+
   mapM_ addPopulation popData
   mapM_ addGDP gdpData
   putStrLn "Data Added Succesfully!"
