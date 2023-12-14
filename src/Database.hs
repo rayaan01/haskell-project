@@ -11,6 +11,8 @@ import Data.Char ( isDigit, toUpper, toLower )
 import System.IO (hFlush, stdout)
 import Data.List (intercalate)
 import Data.Typeable (typeOf)
+import Data.String (fromString)
+
 
 -- | Opens a connection to the database and perform actions.
 withConn :: String -> (Connection -> IO ()) -> IO ()
@@ -122,18 +124,15 @@ initiateFuzzySearch = do
     countryName <- prompt "\nEnter the country name: "
     conn <- open "tools.db"
     results <- executeFuzzyMatch conn countryName
-    -- let te =  "Select From one of these: " ++ (length)
-    putStrLn "Select from list: \n"
+    putStrLn "Confirm your choice: \n"
     let gh = convertToString results
-    mapM_ print gh
+    mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
     close conn
 
-    option <-  prompt "\n Your option: "
+    option <- prompt "\n Your option: "
     let op = read option :: Int
 
-    return (gh !! (op - 1 ))
-    -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-    -- fetchPopulationAndGDP capitalizedCountryName year
+    return (gh !! (op - 1))
 
 -- | Capitalizse each word in a given string for error handling
 capitalizeWords :: String -> String
@@ -204,4 +203,35 @@ displayAllGDPData = withConn "tools.db" $ \conn -> do
   where
     printGDP (name, gdp2010, gdp2015, gdp2021) =
       putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
+
+updatePopulationData :: String -> String -> String -> IO ()
+updatePopulationData countryName year newPopulation = withConn "tools.db" $ \conn -> do
+    let capitalizedCountryName = capitalizeWords countryName
+    let updateQuery = fromString $ "UPDATE POPULATION SET " ++ getPopulationColumn year ++ " = ? WHERE countryNameP = ?"
+    execute conn updateQuery (newPopulation, capitalizedCountryName)
+    putStrLn "Population data updated successfully."
+
+getPopulationColumn :: String -> String
+getPopulationColumn "2010" = "pop2010"
+getPopulationColumn "2015" = "pop2015"
+getPopulationColumn "2021" = "pop2021"
+getPopulationColumn _      = error "Invalid year"
+
+
+updateGDPData :: String -> String -> String -> IO ()
+updateGDPData countryName year newGDP = withConn "tools.db" $ \conn -> do
+    let capitalizedCountryName = capitalizeWords countryName
+    let updateQuery = fromString $ "UPDATE GDP SET " ++ getGDPColumn year ++ " = ? WHERE countryNameG = ?"
+    execute conn updateQuery (newGDP, capitalizedCountryName)
+    putStrLn "GDP data updated successfully."
+
+getGDPColumn :: String -> String
+getGDPColumn "2010" = "gdp2010"
+getGDPColumn "2015" = "gdp2015"
+getGDPColumn "2021" = "gdp2021"
+getGDPColumn _      = error "Invalid year"
+
+
+
+-- Similarly update the updateGDPData function
 

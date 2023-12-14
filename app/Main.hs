@@ -12,7 +12,9 @@ nameToBeDetermined = do
   putStrLn "3 - Fetch both Population and GDP of a country"
   putStrLn "4 - Display Population data of all the countries"
   putStrLn "5 - Display GDP data of all countries"
-  putStrLn "6 - Exit"
+  putStrLn "6 - Update Population data of a country"
+  putStrLn "7 - Update GDP data of a country"
+  putStrLn "8 - Exit"
 
   option <- prompt "\nSelect the option you want: "
   case option of
@@ -37,7 +39,19 @@ nameToBeDetermined = do
       "5" -> do
         displayAllGDPData
         nameToBeDetermined
-      "6" -> die (show "Exitting..")
+      "6" -> do
+        countryName <- initiateFuzzySearch
+        year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+        new_value <- prompt "\nEnter new data (in millions): "
+        updatePopulationData countryName year new_value
+        nameToBeDetermined
+      "7" -> do
+        countryName <- initiateFuzzySearch
+        year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+        new_value <- prompt "\nEnter new data : "
+        updateGDPData countryName year new_value
+        nameToBeDetermined
+      "8" -> die (show "Exitting..")
       _ -> do
         putStrLn "Invalid option selected. Please try again."
         nameToBeDetermined
