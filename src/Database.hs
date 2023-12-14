@@ -64,20 +64,23 @@ addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = wi
    execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
 
 
-callMain :: [RecordGDP] -> IO ()
-callMain gdpData = mapM_ (addGDP gdpData) gdpData
+saveGDPData :: [RecordGDP] -> IO ()
+saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
+
+-- savePOPData :: [RecordPOP] -> IO ()
+-- savePOPData popData = mapM_ (addGDP popData) popData
 
 -- The addGDP function
 getGdp :: String -> [RecordGDP] -> Int
 getGdp yr records = 
-    case filter (\r -> year r == yr) records of
+    case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
         (x:_) -> read (filter isDigit (gdp x)) :: Int
 
 addGDP :: [RecordGDP] -> RecordGDP -> IO ()
 addGDP gdpData record = withConn "tools.db" $ \conn -> do
-    let countryNameG = r_country record
-    let countryRecords = filter (\r -> r_country r == countryNameG) gdpData
+    let countryNameG = g_country record
+    let countryRecords = filter (\r -> g_country r == countryNameG) gdpData
     let gdp2010 = getGdp "2010" countryRecords
     let gdp2015 = getGdp "2015" countryRecords
     let gdp2021 = getGdp "2021" countryRecords
