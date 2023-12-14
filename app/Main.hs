@@ -9,9 +9,8 @@ import Text.Read (readMaybe)
 import Data.Maybe (fromJust, isJust)
 
 
-
 -- | main menu given to user for various operations 
-nameToBeDetermined = do
+loopForever = do
   putStrLn "\n\n1 - Fetch population of a country"
   putStrLn "2 - Fetch GDP of a country"
   putStrLn "3 - Fetch both Population and GDP of a country"
@@ -26,63 +25,40 @@ nameToBeDetermined = do
       "1" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        if year `elem` ["2010", "2015", "2021"] then do
-            fetchPopulation countryName year
-            nameToBeDetermined
-        else do
-            putStrLn "Invalid year. Please try again"
-            nameToBeDetermined
+        fetchPopulation countryName year
+        loopForever
       "2" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        if year `elem` ["2010", "2015", "2021"] then do
-            fetchGDP countryName year
-            nameToBeDetermined
-        else do
-            putStrLn "Invalid year. Please try again"
-            nameToBeDetermined
+        fetchGDP countryName year
+        loopForever
       "3" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        if year `elem` ["2010", "2015", "2021"] then do
-            fetchPopulationAndGDP countryName year
-            nameToBeDetermined
-        else do
-            putStrLn "Invalid year. Please try again"
-            nameToBeDetermined
-
+        fetchPopulationAndGDP countryName year
+        loopForever
       "4" -> do
         displayAllPopulationData
-        nameToBeDetermined
-
+        loopForever
       "5" -> do
         displayAllGDPData
-        nameToBeDetermined
-
+        loopForever
       "6" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        if year `elem` ["2010", "2015", "2021"] then do
-          new_value <- prompt "\nEnter new data : "
-          updatePopulationData countryName year new_value
-        else do
-            putStrLn "Invalid year. Please try again"
-            nameToBeDetermined
-
+        new_value <- prompt "\nEnter new data (in millions): "
+        updatePopulationData countryName year new_value
+        loopForever
       "7" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        if year `elem` ["2010", "2015", "2021"] then do
-          new_value <- prompt "\nEnter new data : "
-          updateGDPData countryName year new_value
-        else do
-            putStrLn "Invalid year. Please try again"
-            nameToBeDetermined
-      
+        new_value <- prompt "\nEnter new data : "
+        updateGDPData countryName year new_value
+        loopForever
       "8" -> die (show "Exitting..")
       _ -> do
         putStrLn "Invalid option selected. Please try again."
-        nameToBeDetermined
+        loopForever
 
 -- | The Main function
 main :: IO ()
@@ -103,7 +79,7 @@ main = do
   savePOPData popData
   saveGDPData gdpData
   putStrLn "Data Added Succesfully!"
-  nameToBeDetermined
+  loopForever
 
 -- To Ensure the prompt is displayed before reading input
 prompt :: String -> IO String
@@ -119,12 +95,13 @@ initiateFuzzySearch :: IO String
 initiateFuzzySearch = do
     createFtsTable
     countryName <- prompt "\nEnter the country name: "
-    results <- executeFuzzyMatch "tools.db" countryName
+    results <- executeFuzzyMatch dbPath countryName
     let gh = convertToString results
 
     if null gh then do
         putStrLn "Invalid country name. No matches found."
-        nameToBeDetermined
+
+        loopForever
         return ""
     else do
         putStrLn "\nSelect from list: \n"
@@ -136,5 +113,5 @@ initiateFuzzySearch = do
             return (gh !! (fromJust maybeOp - 1))
         else do
             putStrLn "\nInvalid option. Please try again."
-            nameToBeDetermined
+            loopForever
             return ""

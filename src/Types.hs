@@ -1,7 +1,9 @@
 {-# LANGUAGE GADTs #-}
 -- | This file has all data types used throughout the application.
-module Types (URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..), CounOption(..)) where
+module Types (dbPath, URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..), CounOption(..)) where
 import Database.SQLite.Simple.FromRow
+
+dbPath = "un-data.db"
 
 -- | URLS is used to save urls from which to download the data.
 data URLS =  
