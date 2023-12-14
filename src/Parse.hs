@@ -40,7 +40,7 @@ parseGDP csvData  = do
   map parseGDPRecord newFilteredRecord
 
 parsePOP :: [[String]] -> [RecordPOP]
-parsePOP !csvData = do
+parsePOP csvData = do
   let newcsvData = drop 842 csvData
   let filteredRecord = filter filterPOP newcsvData
   let newFilteredRecord = filter filterYear filteredRecord
@@ -66,6 +66,6 @@ getPOP = do
     contents <- hGetContents handle
     let parseRes = parse csvFile filePath contents
     let csvData = fromRight [["invalid"]] parseRes  
-    let records = parsePOP csvData
+    let !records = parsePOP csvData
     hClose handle
     return records

@@ -1,8 +1,6 @@
 module Main (main) where
 
 import Fetch (downloadURLS, getURLConstructor) 
-import Parse
-import Types
 import Database
 import Parse (getGDP, getPOP)
 
@@ -11,8 +9,6 @@ main :: IO ()
 main = do
   -- Fetching
   let dataUN = getURLConstructor "UN"
-  let files = CSVFiles { gdpf = "gdp", popf =  "pop"}
-
   downloadURLS dataUN
 
   -- Parsing
@@ -21,8 +17,8 @@ main = do
 
   -- Database
   createTables
-  -- saveGDPData popData 
+  savePOPData popData
   saveGDPData gdpData 
   putStrLn "Data Added Succesfully!"
   fetchGDP "United Kingdom" "2015"
-  fetchPopulation "USA" "2015"
+  fetchPopulation "Austria" "2015"
