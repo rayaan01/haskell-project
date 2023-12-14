@@ -10,7 +10,6 @@ import Data.Either
 -- import Data.Text (Text, pack)
 -- import Data.Typeable
 
-
 parseRecord :: [String] -> RecordCsv
 
 parseRecord record = Record {
@@ -33,7 +32,7 @@ parseGDP !csvData  = do
   let newFilteredRecord = filter filterYear filteredRecord
   map parseRecord newFilteredRecord
 
--- parseCSV :: CSVFiles -> IO [RecordCsv]
+parseCSV :: CSVFiles -> IO [RecordCsv]
 parseCSV fileCSV = do
     handle <- openFile (gdpf fileCSV ++ ".csv") ReadMode
     hSetEncoding handle char8

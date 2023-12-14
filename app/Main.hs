@@ -19,8 +19,9 @@ main = do
   records <- parseCSV files
   -- Database
   createTables
-
-  mapM_ addPopulation popData  
-  addGDP records -- "India"
+  
+  mapM_ addPopulation popData
+  
+  callMain records -- "India"
   putStrLn "Data Added Succesfully!"
 
