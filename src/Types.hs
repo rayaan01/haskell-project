@@ -11,4 +11,4 @@ data CSVFiles = -- | Used to store file names of the files
   CSVFiles {
     gdpf :: String,
     popf :: String
-  }
+}
