@@ -9,17 +9,53 @@ import Data.Time
 import Types
 import Data.Char (isDigit)                            
 
+data Population = Population
+ { countryID :: Int
+ , countryNameP :: String
+ , pop2010 :: String
+ , pop2015 :: String
+ , pop2021 :: String
+ , capital :: String
+ }
+
+data GDP = GDP
+ { countryNameG :: String
+ , gdp2010 :: Int
+ , gdp2015 :: Int
+ , gdp2021 :: Int
+ }
+
+instance Show Population where
+   show population = mconcat [ show $ countryID population
+                             , ".) "
+                             , countryNameP population
+                             , ", Capital: "
+                             , capital population
+                             , ", 2010: "
+                             , show $ pop2010 population
+                             , ", 2015: "
+                             , show $ pop2015 population
+                             , ", 2021: "
+                             , show $ pop2021 population
+                             , "\n"]
+
+instance Show GDP where
+   show gdp = mconcat [ countryNameG gdp
+                      , ", 2010: "
+                      , show $ gdp2010 gdp
+                      , ", 2015: "
+                      , show $ gdp2015 gdp
+                      , ", 2021: "
+                      , show $ gdp2021 gdp
+                      , "\n"]
+
 withConn :: String -> (Connection -> IO ()) -> IO ()
 withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
 
--- Assuming popData and gdpData are lists of tuples...
--- popData :: [(Int, String, String, Int, Int, Int)]
--- popData = [(3, "USA", "Delhi", 100, 200, 300), (4, "Russia", "Karachi", 100, 200, 300)]
-
-addPopulation :: (Int, String, String, Int, Int, Int) -> IO ()
+addPopulation :: (Int, String, String, String, String, String) -> IO ()
 addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = withConn "tools.db" $ \conn -> do
    execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
 
@@ -54,18 +90,18 @@ addPOP popData record = withConn "tools.db" $ \conn -> do
     let pop2021 = getPop "2021" countryRecords
     execute conn "INSERT OR REPLACE INTO POPULATION (countryNameP, pop2010, pop2015, pop2021) VALUES (?,?,?,?)" (countryNameP, pop2010, pop2015, pop2021)
 
-getPop :: String -> [RecordPOP] -> Int
+getPop :: String -> [RecordPOP] -> String
 getPop yr records = 
     case filter (\r -> p_year r == yr) records of
-        [] -> 0  -- or any other default value
-        (x:_) -> read (filter isDigit (pop x)) :: Int
+        [] -> "0" 
+        (x:_) -> ((pop x)) :: String
 
 -- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
     execute_ conn "DROP TABLE IF EXISTS GDP;"
-    execute_ conn "CREATE TABLE POPULATION (countryNameP TEXT PRIMARY KEY, capital TEXT, pop2010 INTEGER, pop2015 INTEGER, pop2021 INTEGER);"
+    execute_ conn "CREATE TABLE POPULATION (countryNameP TEXT PRIMARY KEY, capital TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT);"
     putStrLn "Tables created"
 
@@ -84,11 +120,11 @@ fetchGDP countryName year = withConn "tools.db" $ \conn -> do
 
 fetchPopulation :: String -> String -> IO ()
 fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
-    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(Int, Int, Int)]
+    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(String, String, String)]
     case r of
         [] -> putStrLn "No data found"
         [(pop2010, pop2015, pop2021)] -> case year of
-            "2010" -> print (countryName, pop2010)
-            "2015" -> print (countryName, pop2015)
-            "2021" -> print (countryName, pop2021)
+            "2010" -> print (countryName, pop2010 ++ " Millions")
+            "2015" -> print (countryName, pop2015 ++ " Millions")
+            "2021" -> print (countryName, pop2021 ++ " Millions")
             _ -> putStrLn "Invalid year"
