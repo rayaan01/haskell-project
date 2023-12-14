@@ -5,6 +5,9 @@ import Types
 import Parse (getGDP, getPOP)
 import System.Exit (die)
 import System.IO
+import Text.Read (readMaybe)
+import Data.Maybe (fromJust, isJust)
+
 
 -- | main menu given to user for various operations 
 loopForever = do
@@ -97,11 +100,18 @@ initiateFuzzySearch = do
 
     if null gh then do
         putStrLn "Invalid country name. No matches found."
+
         loopForever
+        return ""
     else do
-        putStrLn "Confirm your choice: \n"
+        putStrLn "\nSelect from list: \n"
         mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
 
-        option <- prompt "\n Your option: "
-        let op = read option :: Int
-        return (gh !! (op - 1))
+        optionStr <- prompt "\nYour option: "
+        let maybeOp = readMaybe optionStr :: Maybe Int
+        if isJust maybeOp && fromJust maybeOp > 0 && fromJust maybeOp <= length gh then
+            return (gh !! (fromJust maybeOp - 1))
+        else do
+            putStrLn "\nInvalid option. Please try again."
+            loopForever
+            return ""
