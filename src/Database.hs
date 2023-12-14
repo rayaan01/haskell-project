@@ -164,19 +164,21 @@ displayAllGDPData = withConn dbPath  $ \conn -> do
     printGDP (name, gdp2010, gdp2015, gdp2021) =
       putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
 
+-- | Updates the population data for a specific country and year.
 updatePopulationData :: String -> String -> String -> IO ()
 updatePopulationData countryName year newPopulation = withConn "tools.db" $ \conn -> do
     let updateQuery = fromString $ "UPDATE POPULATION SET " ++ getPopulationColumn year ++ " = ? WHERE countryNameP = ?"
     execute conn updateQuery (newPopulation, countryName)
     putStrLn "Population data updated successfully."
 
+-- | retrives the apppropriate column name for the specified year in the Population table
 getPopulationColumn :: String -> String
 getPopulationColumn "2010" = "pop2010"
 getPopulationColumn "2015" = "pop2015"
 getPopulationColumn "2021" = "pop2021"
 getPopulationColumn _      = error "Invalid year"
 
-
+-- | Updates the GDP data for the user given country and year in the database
 updateGDPData :: String -> String -> String -> IO ()
 updateGDPData countryName year newGDP = withConn "tools.db" $ \conn -> do
     let capitalizedCountryName = capitalizeWords countryName
@@ -184,12 +186,14 @@ updateGDPData countryName year newGDP = withConn "tools.db" $ \conn -> do
     execute conn updateQuery (newGDP, capitalizedCountryName)
     putStrLn "GDP data updated successfully."
 
+-- | retrives the apppropriate column name for the specified year in the GDP table
 getGDPColumn :: String -> String
 getGDPColumn "2010" = "gdp2010"
 getGDPColumn "2015" = "gdp2015"
 getGDPColumn "2021" = "gdp2021"
 getGDPColumn _      = error "Invalid year"
 
+-- | Implementing full text search (FTS) Table using SQLite's extension.
 createFtsTable :: IO ()
 createFtsTable= withConn dbPath  $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS NameFts;"

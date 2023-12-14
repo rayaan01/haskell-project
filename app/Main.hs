@@ -20,6 +20,7 @@ loopForever = do
   putStrLn "7 - Update GDP data of a country"
   putStrLn "8 - Exit"
 
+-- | Giving options for each use case
   option <- prompt "\nSelect the option you want: "
   case option of
       "1" -> do
@@ -91,6 +92,7 @@ prompt text = do
 convertToString :: [CounOption] -> [String]
 convertToString = map (\(CounOption str) -> str)
 
+-- | Implementing fuzzy seach for suggesting results to users with partial text input
 initiateFuzzySearch :: IO String
 initiateFuzzySearch = do
     createFtsTable
