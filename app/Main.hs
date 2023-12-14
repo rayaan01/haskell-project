@@ -27,5 +27,5 @@ main = do
 
   mapM_ addPopulation popData
   
-  addGDP records -- "India"
+  callMain records -- "India"
   putStrLn "Data Added Succesfully!"
