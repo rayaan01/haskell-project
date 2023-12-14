@@ -1,8 +1,10 @@
 module Main (main) where
 import Fetch (downloadURLS, getURLConstructor)
 import Database
+import Types
 import Parse (getGDP, getPOP)
 import System.Exit (die)
+import System.IO
 
 
 -- | main menu given to user for various operations 
@@ -62,3 +64,30 @@ main = do
   saveGDPData gdpData
   putStrLn "Data Added Succesfully!"
   nameToBeDetermined
+
+-- To Ensure the prompt is displayed before reading input
+prompt :: String -> IO String
+prompt text = do
+    putStr text
+    hFlush stdout
+    getLine
+
+convertToString :: [CounOption] -> [String]
+convertToString = map (\(CounOption str) -> str)
+
+initiateFuzzySearch :: IO String
+initiateFuzzySearch = do
+    createFtsTable
+    countryName <- prompt "\nEnter the country name: "
+    results <- executeFuzzyMatch "tools.db" countryName
+    -- let te =  "Select From one of these: " ++ (length)
+    putStrLn "Select from list: \n"
+    let gh = convertToString results
+    mapM_ print gh
+
+    option <-  prompt "\n Your option: "
+    let op = read option :: Int
+
+    return (gh !! (op - 1 ))
+    -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+    -- fetchPopulationAndGDP capitalizedCountryName year
