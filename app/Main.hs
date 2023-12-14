@@ -6,9 +6,8 @@ import Parse (getGDP, getPOP)
 import System.Exit (die)
 import System.IO
 
-
 -- | main menu given to user for various operations 
-nameToBeDetermined = do
+loopForever = do
   putStrLn "\n\n1 - Fetch population of a country"
   putStrLn "2 - Fetch GDP of a country"
   putStrLn "3 - Fetch both Population and GDP of a country"
@@ -24,39 +23,39 @@ nameToBeDetermined = do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulation countryName year
-        nameToBeDetermined
+        loopForever
       "2" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchGDP countryName year
-        nameToBeDetermined
+        loopForever
       "3" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulationAndGDP countryName year
-        nameToBeDetermined
+        loopForever
       "4" -> do
         displayAllPopulationData
-        nameToBeDetermined
+        loopForever
       "5" -> do
         displayAllGDPData
-        nameToBeDetermined
+        loopForever
       "6" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         new_value <- prompt "\nEnter new data (in millions): "
         updatePopulationData countryName year new_value
-        nameToBeDetermined
+        loopForever
       "7" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         new_value <- prompt "\nEnter new data : "
         updateGDPData countryName year new_value
-        nameToBeDetermined
+        loopForever
       "8" -> die (show "Exitting..")
       _ -> do
         putStrLn "Invalid option selected. Please try again."
-        nameToBeDetermined
+        loopForever
 
 -- | The Main function
 main :: IO ()
@@ -77,7 +76,7 @@ main = do
   savePOPData popData
   saveGDPData gdpData
   putStrLn "Data Added Succesfully!"
-  nameToBeDetermined
+  loopForever
 
 -- To Ensure the prompt is displayed before reading input
 prompt :: String -> IO String
@@ -98,13 +97,11 @@ initiateFuzzySearch = do
 
     if null gh then do
         putStrLn "Invalid country name. No matches found."
-        nameToBeDetermined
+        loopForever
     else do
-        putStrLn "Select from list: \n"
+        putStrLn "Confirm your choice: \n"
         mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
 
         option <- prompt "\n Your option: "
         let op = read option :: Int
         return (gh !! (op - 1))
-
-

@@ -75,7 +75,6 @@ createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT, FOREIGN KEY (countryNameG) REFERENCES POPULATION(countryNameP));"
     putStrLn "Tables created"
 
-
 -- Function to fetch GDP data
 fetchGDP :: String -> String -> IO ()
 fetchGDP countryName year = withConn "tools.db" $ \conn -> do
@@ -94,7 +93,7 @@ fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
         [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year countryName pop2010 pop2015 pop2021
         _ -> putStrLn "Invalid year"
 
--- | Capitalizse each word in a given string for error handling
+-- | Capitalise each word in a given string for error handling
 capitalizeWords :: String -> String
 capitalizeWords = unwords . map capitalizeWord . words
 
