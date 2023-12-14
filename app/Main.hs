@@ -24,9 +24,16 @@ nameToBeDetermined = do
         countryName <- prompt "\nEnter the country name: "
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulationAndGDP countryName year
-      -- "4" -> displayAllPopulationData
-      -- "5" -> displayAllGDPData
-      _ -> nameToBeDetermined
+        nameToBeDetermined
+      "4" -> do
+        displayAllPopulationData
+        nameToBeDetermined
+      "5" -> do
+        displayAllGDPData
+        nameToBeDetermined
+      _ -> do
+        putStrLn "Invalid option selected. Please try again."
+        nameToBeDetermined
       
 
 -- | The Main function
@@ -70,6 +77,13 @@ main = do
         countryName <- prompt "\nEnter the country name: "
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
         fetchPopulationAndGDP countryName year
-      -- "4" -> displayAllPopulationData
-      -- "5" -> displayAllGDPData
-      _ -> putStrLn "Invalid option selected. Please try again."
+        nameToBeDetermined
+      "4" -> do
+        displayAllPopulationData
+        nameToBeDetermined
+      "5" -> do
+        displayAllGDPData
+        nameToBeDetermined
+      _ -> do
+        putStrLn "Invalid option selected. Please try again."
+        nameToBeDetermined
