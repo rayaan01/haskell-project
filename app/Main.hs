@@ -5,6 +5,9 @@ import Types
 import Parse (getGDP, getPOP)
 import System.Exit (die)
 import System.IO
+import Text.Read (readMaybe)
+import Data.Maybe (fromJust, isJust)
+
 
 
 -- | main menu given to user for various operations 
@@ -23,36 +26,59 @@ nameToBeDetermined = do
       "1" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchPopulation countryName year
-        nameToBeDetermined
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchPopulation countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
       "2" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchGDP countryName year
-        nameToBeDetermined
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchGDP countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
       "3" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchPopulationAndGDP countryName year
-        nameToBeDetermined
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchPopulationAndGDP countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+
       "4" -> do
         displayAllPopulationData
         nameToBeDetermined
+
       "5" -> do
         displayAllGDPData
         nameToBeDetermined
+
       "6" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        new_value <- prompt "\nEnter new data (in millions): "
-        updatePopulationData countryName year new_value
-        nameToBeDetermined
+        if year `elem` ["2010", "2015", "2021"] then do
+          new_value <- prompt "\nEnter new data : "
+          updatePopulationData countryName year new_value
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+
       "7" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        new_value <- prompt "\nEnter new data : "
-        updateGDPData countryName year new_value
-        nameToBeDetermined
+        if year `elem` ["2010", "2015", "2021"] then do
+          new_value <- prompt "\nEnter new data : "
+          updateGDPData countryName year new_value
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+      
       "8" -> die (show "Exitting..")
       _ -> do
         putStrLn "Invalid option selected. Please try again."
@@ -99,12 +125,16 @@ initiateFuzzySearch = do
     if null gh then do
         putStrLn "Invalid country name. No matches found."
         nameToBeDetermined
+        return ""
     else do
-        putStrLn "Select from list: \n"
+        putStrLn "\nSelect from list: \n"
         mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
 
-        option <- prompt "\n Your option: "
-        let op = read option :: Int
-        return (gh !! (op - 1))
-
-
+        optionStr <- prompt "\nYour option: "
+        let maybeOp = readMaybe optionStr :: Maybe Int
+        if isJust maybeOp && fromJust maybeOp > 0 && fromJust maybeOp <= length gh then
+            return (gh !! (fromJust maybeOp - 1))
+        else do
+            putStrLn "\nInvalid option. Please try again."
+            nameToBeDetermined
+            return ""
