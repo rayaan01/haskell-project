@@ -56,39 +56,56 @@ withConn dbName action = do
    close conn
 
 -- Assuming popData and gdpData are lists of tuples...
-popData :: [(Int, String, String, Int, Int, Int)]
-popData = [(3, "USA", "Delhi", 100, 200, 300), (4, "Russia", "Karachi", 100, 200, 300)]
+-- popData :: [(Int, String, String, Int, Int, Int)]
+-- popData = [(3, "USA", "Delhi", 100, 200, 300), (4, "Russia", "Karachi", 100, 200, 300)]
 
 addPopulation :: (Int, String, String, Int, Int, Int) -> IO ()
 addPopulation (countryID, countryNameP, capital, pop2010, pop2015, pop2021) = withConn "tools.db" $ \conn -> do
    execute conn "INSERT INTO POPULATION (countryID, countryNameP, capital, pop2010, pop2015, pop2021) VALUES (?,?,?,?,?,?)" (countryID, countryNameP, capital, pop2010, pop2015, pop2021)                                            
 
+saveGDPData :: [RecordGDP] -> IO ()
+saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
-callMain :: [RecordGDP] -> IO ()
-callMain gdpData = mapM_ (addGDP gdpData) gdpData
+savePOPData :: [RecordPOP] -> IO ()
+savePOPData popData = mapM_ (addPOP popData) popData
 
 -- The addGDP function
 getGdp :: String -> [RecordGDP] -> Int
 getGdp yr records = 
-    case filter (\r -> year r == yr) records of
+    case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
         (x:_) -> read (filter isDigit (gdp x)) :: Int
 
 addGDP :: [RecordGDP] -> RecordGDP -> IO ()
 addGDP gdpData record = withConn "tools.db" $ \conn -> do
-    let countryNameG = r_country record
-    let countryRecords = filter (\r -> r_country r == countryNameG) gdpData
+    let countryNameG = g_country record
+    let countryRecords = filter (\r -> g_country r == countryNameG) gdpData
     let gdp2010 = getGdp "2010" countryRecords
     let gdp2015 = getGdp "2015" countryRecords
     let gdp2021 = getGdp "2021" countryRecords
     execute conn "INSERT OR REPLACE INTO GDP (countryNameG, gdp2010, gdp2015, gdp2021) VALUES (?,?,?,?)" (countryNameG, gdp2010, gdp2015, gdp2021)
+
+addPOP :: [RecordPOP] -> RecordPOP -> IO ()
+addPOP popData record = withConn "tools.db" $ \conn -> do
+    let countryNameP = p_country record
+    let countryRecords = filter (\r -> p_country r == countryNameP) popData
+    let pop2010 = getPop "2010" countryRecords
+    let pop2015 = getPop "2015" countryRecords
+    let pop2021 = getPop "2021" countryRecords
+    execute conn "INSERT OR REPLACE INTO POPULATION (countryNameP, pop2010, pop2015, pop2021) VALUES (?,?,?,?)" (countryNameP, pop2010, pop2015, pop2021)
+
+getPop :: String -> [RecordPOP] -> Int
+getPop yr records = 
+    case filter (\r -> p_year r == yr) records of
+        [] -> 0  -- or any other default value
+        (x:_) -> read (filter isDigit (pop x)) :: Int
 
 -- Use mapM_ to apply addPopulation and addGDP to each element in popData and gdpData
 createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
     execute_ conn "DROP TABLE IF EXISTS GDP;"
-    execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, capital TEXT, pop2010 INTEGER, pop2015 INTEGER, pop2021 INTEGER);"
+    execute_ conn "CREATE TABLE POPULATION (countryNameP TEXT PRIMARY KEY, capital TEXT, pop2010 INTEGER, pop2015 INTEGER, pop2021 INTEGER);"
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT);"
     putStrLn "Tables created"
 

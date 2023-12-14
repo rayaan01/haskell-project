@@ -1,4 +1,4 @@
-module Types (URLS(..), CSVFiles(..), RecordGDP(..)) where
+module Types (URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..)) where
 
 data URLS = -- | URLS is used to save urls from which to download the data. 
   URLS {
@@ -14,8 +14,15 @@ data CSVFiles = -- | Used to store file names of the files
   }
 
 data RecordGDP = RecordGDP {
-  r_id :: Int,
-  r_country :: String,
-  year:: String,
+  g_id :: Int,
+  g_country :: String,
+  g_year :: String,
   gdp :: String
+} deriving (Show)
+
+data RecordPOP = RecordPOP {
+  p_id :: Int,
+  p_country :: String,
+  p_year :: String,
+  pop :: String
 } deriving (Show)
