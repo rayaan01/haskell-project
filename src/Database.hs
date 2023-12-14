@@ -146,3 +146,22 @@ formatGDPData year countryName gdp2010 gdp2015 gdp2021 =
             "2021" -> gdp2021
             _ -> error "Invalid year"
     in "\nGDP Data of " ++ countryName ++ " for " ++ year ++ ": $ " ++ show gdp ++ "\n"
+
+displayAllPopulationData :: IO ()
+displayAllPopulationData = withConn "tools.db" $ \conn -> do
+    rows <- query_ conn "SELECT countryID, countryNameP, pop2010, pop2015, pop2021 FROM POPULATION" :: IO [(Int, String, String, String, String)]
+    putStrLn "\nPopulation Data of All Countries:"
+    mapM_ printPopulation rows
+  where
+    printPopulation (id, name, pop2010, pop2015, pop2021) = 
+      putStrLn $ unwords [show id, "-", name, "Population in 2010:", pop2010, "| 2015:", pop2015, "| 2021:", pop2021]
+
+displayAllGDPData :: IO ()
+displayAllGDPData = withConn "tools.db" $ \conn -> do
+    rows <- query_ conn "SELECT countryNameG, gdp2010, gdp2015, gdp2021 FROM GDP" :: IO [(String, Float, Float, Float)]
+    putStrLn "\nGDP Data of All Countries:"
+    mapM_ printGDP rows
+  where
+    printGDP (name, gdp2010, gdp2015, gdp2021) = 
+      putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
+
