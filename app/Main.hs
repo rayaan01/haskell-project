@@ -21,7 +21,7 @@ main = do
   createTables
   
   mapM_ addPopulation popData
-  
-  callMain records -- "India"
+  callMain records 
   putStrLn "Data Added Succesfully!"
-
+  fetchGDP "United Kingdom" "2015"
+  fetchPopulation "USA" "2015"
