@@ -5,9 +5,13 @@ import Types
 import Parse (getGDP, getPOP)
 import System.Exit (die)
 import System.IO
+import Text.Read (readMaybe)
+import Data.Maybe (fromJust, isJust)
+
+
 
 -- | main menu given to user for various operations 
-loopForever = do
+nameToBeDetermined = do
   putStrLn "\n\n1 - Fetch population of a country"
   putStrLn "2 - Fetch GDP of a country"
   putStrLn "3 - Fetch both Population and GDP of a country"
@@ -22,40 +26,63 @@ loopForever = do
       "1" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchPopulation countryName year
-        loopForever
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchPopulation countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
       "2" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchGDP countryName year
-        loopForever
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchGDP countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
       "3" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        fetchPopulationAndGDP countryName year
-        loopForever
+        if year `elem` ["2010", "2015", "2021"] then do
+            fetchPopulationAndGDP countryName year
+            nameToBeDetermined
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+
       "4" -> do
         displayAllPopulationData
-        loopForever
+        nameToBeDetermined
+
       "5" -> do
         displayAllGDPData
-        loopForever
+        nameToBeDetermined
+
       "6" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        new_value <- prompt "\nEnter new data (in millions): "
-        updatePopulationData countryName year new_value
-        loopForever
+        if year `elem` ["2010", "2015", "2021"] then do
+          new_value <- prompt "\nEnter new data : "
+          updatePopulationData countryName year new_value
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+
       "7" -> do
         countryName <- initiateFuzzySearch
         year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-        new_value <- prompt "\nEnter new data : "
-        updateGDPData countryName year new_value
-        loopForever
+        if year `elem` ["2010", "2015", "2021"] then do
+          new_value <- prompt "\nEnter new data : "
+          updateGDPData countryName year new_value
+        else do
+            putStrLn "Invalid year. Please try again"
+            nameToBeDetermined
+      
       "8" -> die (show "Exitting..")
       _ -> do
         putStrLn "Invalid option selected. Please try again."
-        loopForever
+        nameToBeDetermined
 
 -- | The Main function
 main :: IO ()
@@ -76,7 +103,7 @@ main = do
   savePOPData popData
   saveGDPData gdpData
   putStrLn "Data Added Succesfully!"
-  loopForever
+  nameToBeDetermined
 
 -- To Ensure the prompt is displayed before reading input
 prompt :: String -> IO String
@@ -97,11 +124,17 @@ initiateFuzzySearch = do
 
     if null gh then do
         putStrLn "Invalid country name. No matches found."
-        loopForever
+        nameToBeDetermined
+        return ""
     else do
-        putStrLn "Confirm your choice: \n"
+        putStrLn "\nSelect from list: \n"
         mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
 
-        option <- prompt "\n Your option: "
-        let op = read option :: Int
-        return (gh !! (op - 1))
+        optionStr <- prompt "\nYour option: "
+        let maybeOp = readMaybe optionStr :: Maybe Int
+        if isJust maybeOp && fromJust maybeOp > 0 && fromJust maybeOp <= length gh then
+            return (gh !! (fromJust maybeOp - 1))
+        else do
+            putStrLn "\nInvalid option. Please try again."
+            nameToBeDetermined
+            return ""
