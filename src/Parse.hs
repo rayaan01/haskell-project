@@ -36,23 +36,20 @@ filterPOP x = x !! 3 == "Population mid-year estimates (millions)"
 
 -- | Filtering based on years cause some years dont exist in both files.
 filterYear :: [String] -> Bool
-filterYear x = x !! 2 == "2010" || x !! 2 == "2015" || x !! 2 == "2021"
+filterYear x
+  | y == "2010" = True
+  | y == "2015" = True
+  | y == "2021" = True
+  | otherwise = False
+  where y = x !! 2 
 
 -- | Parser for skipping few rows as data is not country specific.
 parseGDP :: [[String]] ->  [RecordGDP]
-parseGDP csvData  = do
-  let newcsvData = drop 842 csvData
-  let filteredRecord = filter filterGDP newcsvData
-  let newFilteredRecord = filter filterYear filteredRecord
-  map parseGDPRecord newFilteredRecord
+parseGDP csvData  = map parseGDPRecord $ filter filterYear $ filter filterGDP $ drop 842 csvData
 
 -- | Parser for skipping rows as data is not country specific.
 parsePOP :: [[String]] -> [RecordPOP]
-parsePOP csvData = do
-  let newcsvData = drop 842 csvData
-  let filteredRecord = filter filterPOP newcsvData
-  let newFilteredRecord = filter filterYear filteredRecord
-  map parsePOPRecord newFilteredRecord
+parsePOP csvData = map parsePOPRecord $ filter filterYear $ filter filterPOP $ drop 842 csvData
 
 -- | reads and parses the GDP data from CSV file into a list of recordGDP.
 getGDP :: IO [RecordGDP]

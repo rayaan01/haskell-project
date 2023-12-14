@@ -1,17 +1,16 @@
 -- | Functions for intracting with the database for storing.
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE GADTs #-}
 module Database where
 
-import Database.SQLite.Simple                   
-import Database.SQLite.Simple.FromRow           
-import Data.Time    
+import Database.SQLite.Simple
+import Database.SQLite.Simple.FromRow
 import Types
-import Data.Char (isDigit)   
-import Text.Read (readMaybe)  
+import Data.Char ( isDigit, toUpper, toLower )
 import System.IO (hFlush, stdout)
-import Data.Char (toUpper, toLower)
 import Data.List (intercalate)
-
+import Data.Typeable (typeOf)
 
 -- | Opens a connection to the database and perform actions.
 withConn :: String -> (Connection -> IO ()) -> IO ()
@@ -19,6 +18,7 @@ withConn dbName action = do
    conn <- open dbName
    action conn
    close conn
+
 
 -- | Saves a list of records into the database   
 saveGDPData :: [RecordGDP] -> IO ()
@@ -29,7 +29,7 @@ savePOPData popData = mapM_ (addPOP popData) popData
 
 -- | Fetches the GDP for a given year from user input
 getGdp :: String -> [RecordGDP] -> Int
-getGdp yr records = 
+getGdp yr records =
     case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
         (x:_) -> read (filter isDigit (gdp x)) :: Int
@@ -57,9 +57,9 @@ addPOP popData record = withConn "tools.db" $ \conn -> do
 
 -- | Fetches the population for a given country
 getPop :: String -> [RecordPOP] -> String
-getPop yr records = 
+getPop yr records =
     case filter (\r -> p_year r == yr) records of
-        [] -> "0" 
+        [] -> "0"
         (x:_) -> ((pop x)) :: String
 
 -- | Creates tables in the databse for storing population and GDP data
@@ -92,19 +92,54 @@ fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
         [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year capitalizedCountryName pop2010 pop2015 pop2021
         _ -> putStrLn "Invalid year"
 
+--------------------------------------
+
+createFtsTable :: IO ()
+createFtsTable= withConn "tools.db" $ \conn -> do
+    execute_ conn "DROP TABLE IF EXISTS NameFts;"
+    execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
+    execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"
+
+data CounOption where
+  CounOption :: String -> CounOption
+  deriving (Show)
+
+instance FromRow CounOption where
+  fromRow = CounOption <$> field
+
+executeFuzzyMatch :: Connection -> String -> IO [CounOption]
+executeFuzzyMatch conn userInput = do
+  let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
+  query conn que (Only userInput)
+
+convertToString :: [CounOption] -> [String]
+convertToString = map (\(CounOption str) -> str)
+
 -- Function to prompt user and fetch data
-fetchData :: IO ()
-fetchData = do
+initiateFuzzySearch :: IO String
+initiateFuzzySearch = do
+    createFtsTable
     countryName <- prompt "\nEnter the country name: "
-    let capitalizedCountryName = capitalizeWords countryName
-    year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-    fetchPopulationAndGDP capitalizedCountryName year
+    conn <- open "tools.db"
+    results <- executeFuzzyMatch conn countryName
+    -- let te =  "Select From one of these: " ++ (length)
+    putStrLn "Select from list: \n"
+    let gh = convertToString results
+    mapM_ print gh
+    close conn
+
+    option <-  prompt "\n Your option: "
+    let op = read option :: Int
+
+    return (gh !! (op - 1 ))
+    -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+    -- fetchPopulationAndGDP capitalizedCountryName year
 
 -- | Capitalizse each word in a given string for error handling
 capitalizeWords :: String -> String
-capitalizeWords = intercalate " " . map capitalizeWord . words
+capitalizeWords = unwords . map capitalizeWord . words
 
-capitalizeWord :: String -> String
+capitalizeWord :: [Char] -> [Char]
 capitalizeWord "" = ""
 capitalizeWord (x:xs) = toUpper x : map toLower xs
 
@@ -112,7 +147,7 @@ capitalizeWord (x:xs) = toUpper x : map toLower xs
 prompt :: String -> IO String
 prompt text = do
     putStr text
-    hFlush stdout  
+    hFlush stdout
     getLine
 
 -- Function to fetch population and GDP data
@@ -157,7 +192,7 @@ displayAllPopulationData = withConn "tools.db" $ \conn -> do
     putStrLn "\nPopulation Data of All Countries:"
     mapM_ printPopulation rows
   where
-    printPopulation (id, name, pop2010, pop2015, pop2021) = 
+    printPopulation (id, name, pop2010, pop2015, pop2021) =
       putStrLn $ unwords [show id, "-", name, "Population in 2010:", pop2010, "| 2015:", pop2015, "| 2021:", pop2021]
 
 -- | Displays the GDP data of all countries.
@@ -167,6 +202,6 @@ displayAllGDPData = withConn "tools.db" $ \conn -> do
     putStrLn "\nGDP Data of All Countries:"
     mapM_ printGDP rows
   where
-    printGDP (name, gdp2010, gdp2015, gdp2021) = 
+    printGDP (name, gdp2010, gdp2015, gdp2021) =
       putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
 
