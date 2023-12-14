@@ -20,5 +20,6 @@ main = do
   savePOPData popData
   saveGDPData gdpData 
   putStrLn "Data Added Succesfully!"
-  fetchGDP "United Kingdom" "2015"
-  fetchPopulation "Austria" "2015"
+  -- fetchGDP "United Kingdom" "2015"
+  -- fetchPopulation "Austria" "2015"
+  fetchData
