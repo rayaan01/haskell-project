@@ -26,3 +26,4 @@ main = do
   -- | Fetching and displaying GDP and Population data for a specific country and year.
   fetchGDP "United Kingdom" "2015"
   fetchPopulation "Austria" "2015"
+  fetchData
