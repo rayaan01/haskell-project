@@ -10,6 +10,7 @@ import Types
 import Data.Char ( isDigit, toUpper, toLower )
 import System.IO (hFlush, stdout)
 import Data.List (intercalate)
+import Data.Typeable (typeOf)
 
 
 -- | Opens a connection to the database and perform actions.
@@ -99,17 +100,20 @@ createFtsTable= withConn "tools.db" $ \conn -> do
     execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
     execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"
 
-data TestField where
-  TestField :: String -> TestField
+data CounOption where
+  CounOption :: String -> CounOption
   deriving (Show)
 
-instance FromRow TestField where
-  fromRow = TestField <$> field 
+instance FromRow CounOption where
+  fromRow = CounOption <$> field 
 
-executeFuzzyMatch :: Connection -> String -> IO [TestField]
+executeFuzzyMatch :: Connection -> String -> IO [CounOption]
 executeFuzzyMatch conn userInput = do
   let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
   query conn que (Only userInput)
+
+convertToString :: [CounOption] -> [String]
+convertToString = map (\(CounOption str) -> str)
 
 -- Function to prompt user and fetch data
 fetchData :: IO ()
@@ -119,8 +123,19 @@ fetchData = do
     conn <- open "tools.db"
     results <- executeFuzzyMatch conn countryName
     -- let te =  "Select From one of these: " ++ (length)
-    mapM_ print results
+    putStrLn "Select from list: \n"
+    let gh = convertToString results
+    mapM_ print gh
     close conn
+
+    option <-  prompt "\n Your option: " 
+    let op = read option :: Int
+    -- let op =if option > (length gh) then Nothing else option
+
+    -- putStrLn $ "[INFO] >>>> " ++ show op
+    year <- prompt "\nEnter the year (2010, 2015, or 2021): "
+    fetchPopulationAndGDP (gh !! (op -1) ) year
+
     -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
     -- fetchPopulationAndGDP capitalizedCountryName year
 
