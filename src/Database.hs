@@ -40,7 +40,7 @@ getGdp yr records =
 
 -- | Adds the GDP record to the database.
 addGDP :: [RecordGDP] -> RecordGDP -> IO ()
-addGDP gdpData record = withConn "tools.db" $ \conn -> do
+addGDP gdpData record = withConn dbPath  $ \conn -> do
     let countryNameG = g_country record
     let countryRecords = filter (\r -> g_country r == countryNameG) gdpData
     let gdp2010 = getGdp "2010" countryRecords
@@ -50,7 +50,7 @@ addGDP gdpData record = withConn "tools.db" $ \conn -> do
 
 -- | Adds population record to the database.
 addPOP :: [RecordPOP] -> RecordPOP -> IO ()
-addPOP popData record = withConn "tools.db" $ \conn -> do
+addPOP popData record = withConn dbPath  $ \conn -> do
     let countryNameP = p_country record
     let countryID = p_id record
     let countryRecords = filter (\r -> p_country r == countryNameP) popData
@@ -68,7 +68,7 @@ getPop yr records =
 
 -- | Creates tables in the databse for storing population and GDP data
 createTables :: IO ()
-createTables = withConn "tools.db" $ \conn -> do
+createTables = withConn dbPath  $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
     execute_ conn "DROP TABLE IF EXISTS GDP;"
     execute_ conn "CREATE TABLE POPULATION (countryID INTEGER PRIMARY KEY, countryNameP TEXT, pop2010 TEXT, pop2015 TEXT, pop2021 TEXT);"
@@ -77,8 +77,9 @@ createTables = withConn "tools.db" $ \conn -> do
 
 -- Function to fetch GDP data
 fetchGDP :: String -> String -> IO ()
-fetchGDP countryName year = withConn "tools.db" $ \conn -> do
-    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only countryName) :: IO [(Float, Float, Float)]
+fetchGDP countryName year = withConn dbPath  $ \conn -> do
+    let capitalizedCountryName = capitalizeWords countryName
+    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only capitalizedCountryName) :: IO [(Float, Float, Float)]
     case r of
         [] -> putStrLn "No data found"
         [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year countryName gdp2010 gdp2015 gdp2021
@@ -86,8 +87,9 @@ fetchGDP countryName year = withConn "tools.db" $ \conn -> do
 
 -- Function to fetch population data
 fetchPopulation :: String -> String -> IO ()
-fetchPopulation countryName year = withConn "tools.db" $ \conn -> do
-    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(String, String, String)]
+fetchPopulation countryName year = withConn dbPath  $ \conn -> do
+    let capitalizedCountryName = capitalizeWords countryName
+    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only capitalizedCountryName) :: IO [(String, String, String)]
     case r of
         [] -> putStrLn "No data found"
         [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year countryName pop2010 pop2015 pop2021
@@ -109,7 +111,7 @@ executeFuzzyMatch dbPath userInput =
 
 -- Function to fetch population and GDP data
 fetchPopulationAndGDP :: String -> String -> IO ()
-fetchPopulationAndGDP countryName year = withConn "tools.db" $ \conn -> do
+fetchPopulationAndGDP countryName year = withConn dbPath  $ \conn -> do
     popResult <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(String, String, String)]
     case popResult of
         [] -> putStrLn "No population data found"
@@ -144,7 +146,7 @@ formatGDPData year countryName gdp2010 gdp2015 gdp2021 =
 
 -- | Displays the population data of all countries 
 displayAllPopulationData :: IO ()
-displayAllPopulationData = withConn "tools.db" $ \conn -> do
+displayAllPopulationData = withConn dbPath  $ \conn -> do
     rows <- query_ conn "SELECT countryID, countryNameP, pop2010, pop2015, pop2021 FROM POPULATION" :: IO [(Int, String, String, String, String)]
     putStrLn "\nPopulation Data of All Countries:"
     mapM_ printPopulation rows
@@ -154,7 +156,7 @@ displayAllPopulationData = withConn "tools.db" $ \conn -> do
 
 -- | Displays the GDP data of all countries.
 displayAllGDPData :: IO ()
-displayAllGDPData = withConn "tools.db" $ \conn -> do
+displayAllGDPData = withConn dbPath  $ \conn -> do
     rows <- query_ conn "SELECT countryNameG, gdp2010, gdp2015, gdp2021 FROM GDP" :: IO [(String, Float, Float, Float)]
     putStrLn "\nGDP Data of All Countries:"
     mapM_ printGDP rows
@@ -189,7 +191,7 @@ getGDPColumn "2021" = "gdp2021"
 getGDPColumn _      = error "Invalid year"
 
 createFtsTable :: IO ()
-createFtsTable= withConn "tools.db" $ \conn -> do
+createFtsTable= withConn dbPath  $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS NameFts;"
     execute_ conn "CREATE VIRTUAL TABLE NameFts USING FTS5(countrynamef);"
     execute_ conn "INSERT INTO NameFts SELECT countrynamep FROM POPULATION;"

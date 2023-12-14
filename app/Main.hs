@@ -92,7 +92,7 @@ initiateFuzzySearch :: IO String
 initiateFuzzySearch = do
     createFtsTable
     countryName <- prompt "\nEnter the country name: "
-    results <- executeFuzzyMatch "tools.db" countryName
+    results <- executeFuzzyMatch dbPath countryName
     let gh = convertToString results
 
     if null gh then do
