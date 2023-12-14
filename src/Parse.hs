@@ -1,13 +1,14 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# LANGUAGE BangPatterns #-}
 module Parse (parseCSV) where
 
 import Data.CSV
 import Text.ParserCombinators.Parsec
-import Data.Either
 import System.IO
 import Types
+import Data.Either
 -- import Data.Text (Text, pack)
-import Data.Typeable
+-- import Data.Typeable
 
 
 parseRecord :: [String] -> RecordCsv
@@ -20,23 +21,26 @@ filterYear :: [String] -> Bool
 filterYear (_:_:x:xs)= x == "2010" || x == "2015" || x == "2021"
 
 parseGDP :: [[String]] ->  [RecordCsv]
-parseGDP csvData  = do
+parseGDP !csvData  = do
   let newcsvData = drop 842 csvData
   let filteredRecord = filter filterGDP newcsvData
   let newFilteredRecord = filter filterYear filteredRecord
   map parseRecord newFilteredRecord
 
-parseCSV :: CSVFiles -> IO [RecordCsv]
+-- parseCSV :: CSVFiles -> IO [RecordCsv]
 parseCSV fileCSV = do
     handle <- openFile (gdpf fileCSV ++ ".csv") ReadMode
     hSetEncoding handle char8
     contents <- hGetContents handle
-    let result = parse csvFile "" contents
-    -- Required, so we don't close the handle before dooing
-    let csvData = fromRight [["invalid"]] result
+    -- let result = parse csvFile "" contents
+    let parseRes = parse csvFile "gdb.csv" contents
+    let csvData = fromRight [["invalid"]] parseRes  
     let records = parseGDP csvData
-    putStrLn "Forcing Evlauation of Result. "
-    print $ take 1 csvData
+    -- print res
+    -- Required, so we don't close the handle before dooing
+    -- let records = parseGDP csvData
+    -- putStrLn "Forcing Evlauation of Result. "
+    -- print $ take 1 csvData
     -- Dropping all non-Countries from the GDP List
     -- putStrLn $ show records
     hClose handle
