@@ -12,7 +12,6 @@ import System.IO (hFlush, stdout)
 import Data.List (intercalate)
 import Data.Typeable (typeOf)
 
-
 -- | Opens a connection to the database and perform actions.
 withConn :: String -> (Connection -> IO ()) -> IO ()
 withConn dbName action = do
@@ -103,7 +102,7 @@ data CounOption where
   deriving (Show)
 
 instance FromRow CounOption where
-  fromRow = CounOption <$> field 
+  fromRow = CounOption <$> field
 
 executeFuzzyMatch :: Connection -> String -> IO [CounOption]
 executeFuzzyMatch conn userInput = do
@@ -116,7 +115,7 @@ convertToString = map (\(CounOption str) -> str)
 -- Function to prompt user and fetch data
 fetchData :: IO ()
 fetchData = do
-    createFtsTable   
+    createFtsTable
     countryName <- prompt "\nEnter the country name: "
     conn <- open "tools.db"
     results <- executeFuzzyMatch conn countryName
@@ -126,7 +125,7 @@ fetchData = do
     mapM_ print gh
     close conn
 
-    option <-  prompt "\n Your option: " 
+    option <-  prompt "\n Your option: "
     let op = read option :: Int
     -- let op =if option > (length gh) then Nothing else option
 
@@ -137,10 +136,12 @@ fetchData = do
     -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
     -- fetchPopulationAndGDP capitalizedCountryName year
 
--- capitalizeWords :: String -> String
--- capitalizeWords = intercalate " " . map capitalizeWord . words
--- capitalizeWord "" = ""
--- capitalizeWord (x:xs) = toUpper x : map toLower xs
+capitalizeWords :: String -> String
+capitalizeWords = unwords . map capitalizeWord . words
+
+capitalizeWord :: [Char] -> [Char]
+capitalizeWord "" = ""
+capitalizeWord (x:xs) = toUpper x : map toLower xs
 
 -- To Ensure the prompt is displayed before reading input
 prompt :: String -> IO String
@@ -190,7 +191,7 @@ displayAllPopulationData = withConn "tools.db" $ \conn -> do
     putStrLn "\nPopulation Data of All Countries:"
     mapM_ printPopulation rows
   where
-    printPopulation (id, name, pop2010, pop2015, pop2021) = 
+    printPopulation (id, name, pop2010, pop2015, pop2021) =
       putStrLn $ unwords [show id, "-", name, "Population in 2010:", pop2010, "| 2015:", pop2015, "| 2021:", pop2021]
 
 displayAllGDPData :: IO ()
@@ -199,6 +200,6 @@ displayAllGDPData = withConn "tools.db" $ \conn -> do
     putStrLn "\nGDP Data of All Countries:"
     mapM_ printGDP rows
   where
-    printGDP (name, gdp2010, gdp2015, gdp2021) = 
+    printGDP (name, gdp2010, gdp2015, gdp2021) =
       putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
 
