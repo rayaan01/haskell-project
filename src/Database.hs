@@ -19,6 +19,8 @@ withConn dbName action = do
    action conn
    close conn
 
+
+-- | Saves a list of records into the database   
 saveGDPData :: [RecordGDP] -> IO ()
 saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
@@ -60,6 +62,7 @@ getPop yr records =
         [] -> "0"
         (x:_) -> ((pop x)) :: String
 
+-- | Creates tables in the databse for storing population and GDP data
 createTables :: IO ()
 createTables = withConn "tools.db" $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS POPULATION;"
@@ -132,6 +135,7 @@ initiateFuzzySearch = do
     -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
     -- fetchPopulationAndGDP capitalizedCountryName year
 
+-- | Capitalizse each word in a given string for error handling
 capitalizeWords :: String -> String
 capitalizeWords = unwords . map capitalizeWord . words
 
@@ -181,6 +185,7 @@ formatGDPData year countryName gdp2010 gdp2015 gdp2021 =
             _ -> error "Invalid year"
     in "\nGDP Data of " ++ countryName ++ " for " ++ year ++ ": $ " ++ show gdp ++ "\n"
 
+-- | Displays the population data of all countries 
 displayAllPopulationData :: IO ()
 displayAllPopulationData = withConn "tools.db" $ \conn -> do
     rows <- query_ conn "SELECT countryID, countryNameP, pop2010, pop2015, pop2021 FROM POPULATION" :: IO [(Int, String, String, String, String)]
@@ -190,6 +195,7 @@ displayAllPopulationData = withConn "tools.db" $ \conn -> do
     printPopulation (id, name, pop2010, pop2015, pop2021) =
       putStrLn $ unwords [show id, "-", name, "Population in 2010:", pop2010, "| 2015:", pop2015, "| 2021:", pop2021]
 
+-- | Displays the GDP data of all countries.
 displayAllGDPData :: IO ()
 displayAllGDPData = withConn "tools.db" $ \conn -> do
     rows <- query_ conn "SELECT countryNameG, gdp2010, gdp2015, gdp2021 FROM GDP" :: IO [(String, Float, Float, Float)]

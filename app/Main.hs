@@ -4,7 +4,8 @@ import Database
 import Parse (getGDP, getPOP)
 import System.Exit (die)
 
-nameToBeDetermined :: IO ()
+
+-- | main menu given to user for various operations 
 nameToBeDetermined = do
   putStrLn "\n\n1 - Fetch population of a country"
   putStrLn "2 - Fetch GDP of a country"
