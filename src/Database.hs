@@ -13,6 +13,8 @@ import Data.Char ( isDigit, toUpper, toLower )
 import System.IO (hFlush, stdout)
 import Data.List (intercalate)
 import Data.Typeable (typeOf)
+import Data.String (fromString)
+
 
 -- | Opens a connection to the database and perform actions.
 withConn :: String -> (Connection -> IO ()) -> IO ()
@@ -73,7 +75,6 @@ createTables = withConn dbPath  $ \conn -> do
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT, FOREIGN KEY (countryNameG) REFERENCES POPULATION(countryNameP));"
     putStrLn "Tables created"
 
-
 -- Function to fetch GDP data
 fetchGDP :: String -> String -> IO ()
 fetchGDP countryName year = withConn dbPath  $ \conn -> do
@@ -81,7 +82,7 @@ fetchGDP countryName year = withConn dbPath  $ \conn -> do
     r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only capitalizedCountryName) :: IO [(Float, Float, Float)]
     case r of
         [] -> putStrLn "No data found"
-        [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year capitalizedCountryName gdp2010 gdp2015 gdp2021
+        [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year countryName gdp2010 gdp2015 gdp2021
         _ -> putStrLn "Invalid year"
 
 -- Function to fetch population data
@@ -91,10 +92,10 @@ fetchPopulation countryName year = withConn dbPath  $ \conn -> do
     r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only capitalizedCountryName) :: IO [(String, String, String)]
     case r of
         [] -> putStrLn "No data found"
-        [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year capitalizedCountryName pop2010 pop2015 pop2021
+        [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year countryName pop2010 pop2015 pop2021
         _ -> putStrLn "Invalid year"
 
--- | Capitalizse each word in a given string for error handling
+-- | Capitalise each word in a given string for error handling
 capitalizeWords :: String -> String
 capitalizeWords = unwords . map capitalizeWord . words
 
@@ -102,17 +103,11 @@ capitalizeWord :: [Char] -> [Char]
 capitalizeWord "" = ""
 capitalizeWord (x:xs) = toUpper x : map toLower xs
 
-
 executeFuzzyMatch :: String -> String -> IO [CounOption]
 executeFuzzyMatch dbPath userInput = 
   withConnection dbPath $ \conn -> do
     let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
     query conn que (Only userInput)
-
--- executeFuzzyMatch :: Connection -> String -> IO [CounOption]
--- executeFuzzyMatch conn userInput = do
---   let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
---   query conn que (Only userInput)
 
 -- Function to fetch population and GDP data
 fetchPopulationAndGDP :: String -> String -> IO ()
@@ -168,6 +163,32 @@ displayAllGDPData = withConn dbPath  $ \conn -> do
   where
     printGDP (name, gdp2010, gdp2015, gdp2021) =
       putStrLn $ unwords [name, "- GDP in 2010: $", show gdp2010, "| 2015: $", show gdp2015, "| 2021: $", show gdp2021]
+
+updatePopulationData :: String -> String -> String -> IO ()
+updatePopulationData countryName year newPopulation = withConn "tools.db" $ \conn -> do
+    let updateQuery = fromString $ "UPDATE POPULATION SET " ++ getPopulationColumn year ++ " = ? WHERE countryNameP = ?"
+    execute conn updateQuery (newPopulation, countryName)
+    putStrLn "Population data updated successfully."
+
+getPopulationColumn :: String -> String
+getPopulationColumn "2010" = "pop2010"
+getPopulationColumn "2015" = "pop2015"
+getPopulationColumn "2021" = "pop2021"
+getPopulationColumn _      = error "Invalid year"
+
+
+updateGDPData :: String -> String -> String -> IO ()
+updateGDPData countryName year newGDP = withConn "tools.db" $ \conn -> do
+    let capitalizedCountryName = capitalizeWords countryName
+    let updateQuery = fromString $ "UPDATE GDP SET " ++ getGDPColumn year ++ " = ? WHERE countryNameG = ?"
+    execute conn updateQuery (newGDP, capitalizedCountryName)
+    putStrLn "GDP data updated successfully."
+
+getGDPColumn :: String -> String
+getGDPColumn "2010" = "gdp2010"
+getGDPColumn "2015" = "gdp2015"
+getGDPColumn "2021" = "gdp2021"
+getGDPColumn _      = error "Invalid year"
 
 createFtsTable :: IO ()
 createFtsTable= withConn dbPath  $ \conn -> do

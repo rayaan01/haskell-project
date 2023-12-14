@@ -1,59 +1,25 @@
 # Build 
 
-Make sure these deps are installed: `libbz2 libbz2-dev`
-On Ubuntu: `apt install -y pkg-config zlib1g-dev libbz2-dev`
+`stack build`
 
+# Run
 
+`stack run`
 
-# Data Download Links
+# Documentation
 
-## Worldbank
-pop : https://api.worldbank.org/v2/en/indicator/NY.GDP.MKTP.CD?downloadformat=xml
-GDP : https://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=xml
-## UN
-Pop : https://data.un.org/_Docs/SYB/CSV/SYB66_1_202310_Population,%20Surface%20Area%20and%20Density.csv
-GDP : https://data.un.org/_Docs/SYB/CSV/SYB66_230_202310_GDP%20and%20GDP%20Per%20Capita.csv
+```shell
+stack haddock --haddock-arguments --quickjump
+```
 
+And then open an http server at the resulting folder. Below example given with python3 http.server
 
-## Indicators
-=======
-Population -- Country ID | Country name | 2005 | 2010 | 2015 | 2020 | Capital
-GDP -- Country name | 2005 | 2010 | 2015 | 2020 |
+`python3 -m http.server 8080 -d .stack-work/install/x86_64-linux/c5766df4c7e86cbb5f0683ffa849d218a0af6c1bed70a74fe36d7c3d91d9ed4c/9.4.7/doc/`
 
-### WorldBank
-Pop: https://data.worldbank.org/indicator/SP.POP.TOTL
-GDP: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD?most_recent_year_desc=false
+## UN Data URLs
+GDP URL : https://data.un.org/_Docs/SYB/CSV/SYB66_230_202310_GDP%20and%20GDP%20Per%20Capita.csv
+Population URL : https://data.un.org/_Docs/SYB/CSV/SYB66_1_202310_Population,%20Surface%20Area%20and%20Density.csv
 
-### Data UN
-https://data.un.org/
-
-# API'S For getting GDP per country
-
-## UN one 
-
-http://data.un.org/Handlers/DownloadHandler.ashx?DataFilter=Indicator_Code:NY.GDP.MKTP.PP.CD;Country_Code:BEL,BLZ,BRB&DataMartId=WDI&Format=csv&c=2,4,5&s=Country_Name:asc,Year:desc
-
-genereated from: http://data.un.org/Data.aspx?q=gdp&d=WDI&f=Indicator_Code%3aNY.GDP.MKTP.PP.CD
-## Worldbank
-Example for austrilia (aus)
-https://api.worldbank.org/v2/country/aus/indicator/NY.GDP.MKTP.CD?date=2000
-
-# API for getting population
-
-## UN one
-
-Curl query for some countries:
-
-https://data.un.org/_Docs/SYB/CSV/SYB66_230_202310_GDP%20and%20GDP%20Per%20Capita.csv
-## WorldBank
-Example for austrilia (aus)
-https://api.worldbank.org/v2/country/aus/indicator/SP.POP.TOTL?date=2000
-
-
-GDP- 2010, 2015, 2021
-Population - 2010, 2015, 2021
-# MISC
-## API Indicators
-
-Population: SP.POP.TOTL
-GDP:        NY.GDP.MKTP.CD
+## World Bank Data URLs
+GDP URL : https://api.worldbank.org/v2/en/indicator/NY.GDP.MKTP.CD?downloadformat=csv
+Population URL : https://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv
