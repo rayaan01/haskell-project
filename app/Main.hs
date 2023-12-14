@@ -94,14 +94,17 @@ initiateFuzzySearch = do
     createFtsTable
     countryName <- prompt "\nEnter the country name: "
     results <- executeFuzzyMatch "tools.db" countryName
-    -- let te =  "Select From one of these: " ++ (length)
-    putStrLn "Select from list: \n"
     let gh = convertToString results
-    mapM_ print gh
 
-    option <-  prompt "\n Your option: "
-    let op = read option :: Int
+    if null gh then do
+        putStrLn "Invalid country name. No matches found."
+        nameToBeDetermined
+    else do
+        putStrLn "Select from list: \n"
+        mapM_ (\(i, name) -> putStrLn $ show i ++ " - " ++ name) $ zip [1..] gh
 
-    return (gh !! (op - 1 ))
-    -- year <- prompt "\nEnter the year (2010, 2015, or 2021): "
-    -- fetchPopulationAndGDP capitalizedCountryName year
+        option <- prompt "\n Your option: "
+        let op = read option :: Int
+        return (gh !! (op - 1))
+
+
