@@ -4,6 +4,7 @@ module Types (dbPath, URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Popu
 import Database.SQLite.Simple.FromRow
 
 -- | FilePath of the database
+dbPath :: String
 dbPath = "un-data.db"
 
 -- | URLS is used to save urls from which to download the data.
@@ -69,15 +70,15 @@ data GDP = GDP
  , gdp2021 :: Int
  }
 
-instance Show GDP where
-   show gdp = mconcat [ countryNameG gdp
-                      , ", 2010: "
-                      , show $ gdp2010 gdp
-                      , ", 2015: "
-                      , show $ gdp2015 gdp
-                      , ", 2021: "
-                      , show $ gdp2021 gdp
-                      , "\n"]
+-- instance Show GDP where
+--    show gdp = mconcat [ countryNameG gdp
+--                       , ", 2010: "
+--                       , show $ gdp2010 gdp
+--                       , ", 2015: "
+--                       , show $ gdp2015 gdp
+--                       , ", 2021: "
+--                       , show $ gdp2021 gdp
+--                       , "\n"]
 
 -- | Country Option is a special type used to store fuzzy option for a query.
 data CounOption where

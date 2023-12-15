@@ -1,18 +1,12 @@
 -- | Functions for intracting with the database for storing.
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE GADTs #-}
 module Database where
 
-import Database.SQLite.Simple (withConnection, query)
 -- import Database.SQLite.Simple.FromRow (Only(..))
 import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
 import Types
-import Data.Char ( isDigit, toUpper, toLower )
-import System.IO (hFlush, stdout)
-import Data.List (intercalate)
-import Data.Typeable (typeOf)
+import Data.Char ( isDigit)
 import Data.String (fromString)
 
 
@@ -24,10 +18,11 @@ withConn dbName action = do
    close conn
 
 
--- | Saves a list of records into the database   
+-- | Iterate over the list of GDP Record calling add GDP to save them in database.
 saveGDPData :: [RecordGDP] -> IO ()
 saveGDPData gdpData = mapM_ (addGDP gdpData) gdpData
 
+-- | Iterate over the list of POP Record calling add GDP to save them in database.
 savePOPData :: [RecordPOP] -> IO ()
 savePOPData popData = mapM_ (addPOP popData) popData
 
@@ -36,7 +31,7 @@ getGdp :: String -> [RecordGDP] -> Int
 getGdp yr records =
     case filter (\r -> g_year r == yr) records of
         [] -> 0  -- or any other default value
-        (x:_) -> read (filter isDigit (gdp x)) :: Int
+        (x:_) -> read (filter Data.Char.isDigit (gdp x)) :: Int
 
 -- | Adds the GDP record to the database.
 addGDP :: [RecordGDP] -> RecordGDP -> IO ()
@@ -75,41 +70,40 @@ createTables = withConn dbPath  $ \conn -> do
     execute_ conn "CREATE TABLE GDP (countryNameG TEXT PRIMARY KEY, gdp2010 FLOAT, gdp2015 FLOAT, gdp2021 FLOAT, FOREIGN KEY (countryNameG) REFERENCES POPULATION(countryNameP));"
     putStrLn "Tables created"
 
--- Function to fetch GDP data
+-- | Function to fetch GDP data
 fetchGDP :: String -> String -> IO ()
 fetchGDP countryName year = withConn dbPath  $ \conn -> do
-    let capitalizedCountryName = capitalizeWords countryName
-    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only capitalizedCountryName) :: IO [(Float, Float, Float)]
+    r <- query conn "SELECT gdp2010, gdp2015, gdp2021 FROM GDP WHERE countryNameG = ?" (Only countryName) :: IO [(Float, Float, Float)]
     case r of
         [] -> putStrLn "No data found"
         [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year countryName gdp2010 gdp2015 gdp2021
         _ -> putStrLn "Invalid year"
 
--- Function to fetch population data
+-- | Function to fetch population data
 fetchPopulation :: String -> String -> IO ()
 fetchPopulation countryName year = withConn dbPath  $ \conn -> do
-    let capitalizedCountryName = capitalizeWords countryName
-    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only capitalizedCountryName) :: IO [(String, String, String)]
+    r <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName ) :: IO [(String, String, String)]
     case r of
         [] -> putStrLn "No data found"
         [(pop2010, pop2015, pop2021)] -> putStrLn $ formatPopulationData year countryName pop2010 pop2015 pop2021
         _ -> putStrLn "Invalid year"
 
 -- | Capitalise each word in a given string for error handling
-capitalizeWords :: String -> String
-capitalizeWords = unwords . map capitalizeWord . words
+-- capitalizeWords :: String -> String
+-- capitalizeWords = unwords . map capitalizeWord . words
 
-capitalizeWord :: [Char] -> [Char]
-capitalizeWord "" = ""
-capitalizeWord (x:xs) = toUpper x : map toLower xs
+-- capitalizeWord :: [Char] -> [Char]
+-- capitalizeWord "" = ""
+-- capitalizeWord (x:xs) = toUpper x : map toLower xs
 
+-- | execute a MATCH query on the fts5 table for the county name.
 executeFuzzyMatch :: String -> String -> IO [CounOption]
 executeFuzzyMatch dbPath userInput = 
   withConnection dbPath $ \conn -> do
     let que = "SELECT * FROM NameFts WHERE countrynamef MATCH ?;"
     query conn que (Only userInput)
 
--- Function to fetch population and GDP data
+-- | Function to fetch population and GDP data
 fetchPopulationAndGDP :: String -> String -> IO ()
 fetchPopulationAndGDP countryName year = withConn dbPath  $ \conn -> do
     popResult <- query conn "SELECT pop2010, pop2015, pop2021 FROM POPULATION WHERE countryNameP = ?" (Only countryName) :: IO [(String, String, String)]
@@ -124,7 +118,7 @@ fetchPopulationAndGDP countryName year = withConn dbPath  $ \conn -> do
         [(gdp2010, gdp2015, gdp2021)] -> putStrLn $ formatGDPData year countryName gdp2010 gdp2015 gdp2021
         _ -> putStrLn "Error: Multiple GDP records found"
 
--- Function to format population data for display
+-- | Function to format population data for display
 formatPopulationData :: String -> String -> String -> String -> String -> String
 formatPopulationData year countryName pop2010 pop2015 pop2021 =
     let population = case year of
@@ -134,7 +128,7 @@ formatPopulationData year countryName pop2010 pop2015 pop2021 =
             _ -> "Invalid year"
     in "\n\nPopulation Data of " ++ countryName ++ " for " ++ year ++ ": " ++ population ++ " Millions"
 
--- Function to format GDP data for display
+-- | Function to format GDP data for display
 formatGDPData :: String -> String -> Float -> Float -> Float -> String
 formatGDPData year countryName gdp2010 gdp2015 gdp2021 =
     let gdp = case year of
@@ -181,9 +175,8 @@ getPopulationColumn _      = error "Invalid year"
 -- | Updates the GDP data for the user given country and year in the database
 updateGDPData :: String -> String -> String -> IO ()
 updateGDPData countryName year newGDP = withConn dbPath $ \conn -> do
-    let capitalizedCountryName = capitalizeWords countryName
     let updateQuery = fromString $ "UPDATE GDP SET " ++ getGDPColumn year ++ " = ? WHERE countryNameG = ?"
-    execute conn updateQuery (newGDP, capitalizedCountryName)
+    execute conn updateQuery (newGDP, countryName)
     putStrLn "GDP data updated successfully."
 
 -- | retrives the apppropriate column name for the specified year in the GDP table
@@ -193,7 +186,7 @@ getGDPColumn "2015" = "gdp2015"
 getGDPColumn "2021" = "gdp2021"
 getGDPColumn _      = error "Invalid year"
 
--- | Implementing full text search (FTS) Table using SQLite's extension.
+-- | Create a virtual index with the help of FTS5 extension. And Inert all the country Name into it.
 createFtsTable :: IO ()
 createFtsTable= withConn dbPath  $ \conn -> do
     execute_ conn "DROP TABLE IF EXISTS NameFts;"
