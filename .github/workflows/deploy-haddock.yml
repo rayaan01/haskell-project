@@ -21,26 +21,26 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - uses: haskell/actions/setup@v2
+      - uses: haskell-actions/setup@v2
         with:
           ghc-version: '9.4.7' # Exact version of ghc to use
           # cabal-version: 'latest'. Omitted, but defaults to 'latest'
           enable-stack: true
           stack-version: 'latest'
       - run: 'stack haddock --haddock-arguments --quickjump'
-      - run: 'ls -Rla'
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-        with:
-        ## limits ssh access and adds the ssh public key for the user which triggered the workflow
-          limit-access-to-actor: true
-        ## limits ssh access and adds the ssh public keys of the listed GitHub users
-          limit-access-to-users: kotuw
+      # - run: 'ls -Rla'
+      # - name: Setup upterm session
+      #   uses: lhotari/action-upterm@v1
+      #   with:
+      #   ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+      #     limit-access-to-actor: true
+      #   ## limits ssh access and adds the ssh public keys of the listed GitHub users
+      #     limit-access-to-users: kotuw
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
-          path: '.stack-work/install/x86_64-linux/c5766df4c7e86cbb5f0683ffa849d218a0af6c1bed70a74fe36d7c3d91d9ed4c/9.4.7/doc/'
+          path: './.stack-work/install/x86_64-linux/c5766df4c7e86cbb5f0683ffa849d218a0af6c1bed70a74fe36d7c3d91d9ed4c/9.4.7/doc'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
