@@ -8,6 +8,12 @@
 
 # Documentation
 
+Could be Found on [haskell-project](https://cray-mx.github.io/haskell-project/)
+
+or
+
+## Build Documentation
+
 ```shell
 stack haddock --haddock-arguments --quickjump
 ```
