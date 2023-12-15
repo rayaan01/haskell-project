@@ -3,6 +3,7 @@
 module Types (dbPath, URLS(..), CSVFiles(..), RecordGDP(..), RecordPOP(..), Population(..), GDP(..), CounOption(..)) where
 import Database.SQLite.Simple.FromRow
 
+-- | FilePath of the database
 dbPath = "un-data.db"
 
 -- | URLS is used to save urls from which to download the data.
@@ -78,6 +79,7 @@ instance Show GDP where
                       , show $ gdp2021 gdp
                       , "\n"]
 
+-- | Country Option is a special type used to store fuzzy option for a query.
 data CounOption where
   CounOption :: String -> CounOption
   deriving (Show)
